@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --aurora-green:  #00ffb3;
+            --aurora-teal:   #00d4ff;
+            --aurora-violet: #7b2fff;
+            --aurora-pink:   #ff4fd8;
+            --deep-space:    #020810;
+            --glass-bg:      rgba(255,255,255,0.04);
+            --glass-border:  rgba(255,255,255,0.08);
+            --text-primary:  #e8f4f8;
+            --text-muted:    rgba(232,244,248,0.45);
+            --nav-h:         70px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--deep-space);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ══════════════════════════════
+           CANVAS BACKGROUND
+        ══════════════════════════════ */
+        #auroraCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ══════════════════════════════
+           NAV
+        ══════════════════════════════ */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            background: rgba(2,8,16,0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 0.18em;
+            color: var(--text-primary);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .nav-logo span { color: var(--aurora-green); font-style: italic; }
+
+        .nav-links {
+            display: flex; gap: 36px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0; right: 0;
+            height: 1px; background: var(--aurora-green);
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { transform: scaleX(1); }
+        .nav-links a.active { color: var(--aurora-green); }
+        .nav-links a.active::after { transform: scaleX(1); }
+
+        /* hamburger */
+        .nav-burger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: none;
+            border: none;
+        }
+        .nav-burger span {
+            display: block;
+            width: 24px; height: 1.5px;
+            background: var(--text-primary);
+            transition: all 0.3s;
+        }
+        .nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .nav-burger.open span:nth-child(2) { opacity: 0; }
+        .nav-burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        /* mobile drawer */
+        .nav-drawer {
+            display: none;
+            position: fixed;
+            top: var(--nav-h); left: 0; right: 0;
+            background: rgba(2,8,16,0.97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 99;
+            padding: 24px 28px;
+            flex-direction: column; gap: 0;
+            animation: drawerDown 0.25s ease;
+        }
+        .nav-drawer.open { display: flex; }
+        .nav-drawer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--glass-border);
+            transition: color 0.3s;
+        }
+        .nav-drawer a:last-child { border-bottom: none; }
+        .nav-drawer a:hover, .nav-drawer a.active { color: var(--aurora-green); }
+
+        @keyframes drawerDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══════════════════════════════
+           PAGE
+        ══════════════════════════════ */
+        .page {
+            position: relative; z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ══════════════════════════════
+           HERO
+        ══════════════════════════════ */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: calc(var(--nav-h) + 60px) 24px 80px;
+            min-height: 100vh;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.38em;
+            text-transform: uppercase;
+            color: var(--aurora-green);
+            margin-bottom: 28px;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.3s forwards;
+        }
+
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3.5rem, 11vw, 9rem);
+            font-weight: 300;
+            line-height: 0.95;
+            letter-spacing: -0.01em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.5s forwards;
+        }
+        .hero-title .line-2 {
+            font-style: italic;
+            background: linear-gradient(135deg,
+            var(--aurora-green) 0%,
+            var(--aurora-teal) 45%,
+            var(--aurora-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite, fadeUp 0.9s 0.5s forwards;
+        }
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-sub {
+            font-size: 0.88rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            max-width: 400px;
+            line-height: 2;
+            margin-bottom: 56px;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.7s forwards;
+        }
+
+        .hero-actions {
+            display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.9s forwards;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center; gap: 10px;
+            padding: 13px 28px;
+            border-radius: 3px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.76rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--aurora-green), var(--aurora-teal));
+            color: var(--deep-space);
+            font-weight: 600;
+            box-shadow: 0 0 30px rgba(0,255,179,0.3);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 55px rgba(0,255,179,0.55);
+            transform: translateY(-2px);
+        }
+        .btn-ghost {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+        .btn-ghost:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.07);
+            transform: translateY(-2px);
+        }
+
+        /* scroll hint */
+        .scroll-hint {
+            margin-top: 60px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            opacity: 0;
+            animation: fadeUp 1s 1.3s forwards;
+        }
+        .scroll-hint span {
+            font-size: 0.6rem; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .scroll-arrow {
+            width: 1px; height: 36px;
+            background: linear-gradient(to bottom, var(--aurora-green), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; }
+            50%       { opacity: 1; }
+        }
+
+        /* ══════════════════════════════
+           DIVIDER
+        ══════════════════════════════ */
+        .divider {
+            display: flex; align-items: center; gap: 20px;
+            padding: 0 48px; margin: 0 auto;
+            max-width: 900px; width: 100%;
+        }
+        .divider-line {
+            flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,255,179,0.3), transparent);
+        }
+        .divider-icon {
+            width: 8px; height: 8px;
+            border: 1px solid var(--aurora-green);
+            transform: rotate(45deg); opacity: 0.6;
+        }
+
+        /* ══════════════════════════════
+           CARDS
+        ══════════════════════════════ */
+        .section {
+            padding: 80px 48px 100px;
+            max-width: 1100px; margin: 0 auto; width: 100%;
+        }
+        .section-label {
+            font-size: 0.68rem; letter-spacing: 0.4em;
+            text-transform: uppercase; color: var(--aurora-teal); margin-bottom: 48px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px; padding: 32px;
+            backdrop-filter: blur(12px);
+            position: relative; overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-accent, var(--aurora-green)), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.14); box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+        .card:hover::before { opacity: 1; }
+        .card-1 { --card-accent: var(--aurora-green); }
+        .card-2 { --card-accent: var(--aurora-teal); }
+        .card-3 { --card-accent: var(--aurora-violet); }
+        .card-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem; font-weight: 300;
+            color: var(--card-accent, var(--aurora-green));
+            opacity: 0.2; line-height: 1; margin-bottom: 20px;
+        }
+        .card-title { font-size: 1.05rem; letter-spacing: 0.08em; color: var(--text-primary); margin-bottom: 12px; }
+        .card-text  { font-size: 0.82rem; color: var(--text-muted); line-height: 1.85; }
+
+        /* ══════════════════════════════
+           FOOTER
+        ══════════════════════════════ */
+        footer {
+            padding: 28px 48px;
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-muted);
+        }
+        footer .dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--aurora-green);
+            animation: dotPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,179,0.6); }
+            50%       { box-shadow: 0 0 0 6px rgba(0,255,179,0); }
+        }
+
+        /* ══════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════ */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════ */
+        @media (max-width: 900px) {
+            .cards { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .nav-burger { display: flex; }
+
+            .hero { padding: calc(var(--nav-h) + 36px) 20px 60px; }
+            .hero-sub { font-size: 0.82rem; max-width: 100%; }
+            .hero-actions { flex-direction: column; align-items: stretch; width: 100%; max-width: 280px; }
+            .btn { justify-content: center; }
+            .scroll-hint { margin-top: 36px; }
+
+            .divider { padding: 0 20px; }
+            .section { padding: 60px 20px 80px; }
+            .cards { grid-template-columns: 1fr; }
+
+            footer { flex-direction: column; gap: 14px; text-align: center; padding: 24px 20px; }
+        }
+
+        @media (min-width: 641px) and (max-width: 900px) {
+            nav { padding: 0 28px; }
+            .nav-links { gap: 22px; }
+            .section { padding: 70px 28px 90px; }
+            footer { padding: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="auroraCanvas"></canvas>
+
+<div class="page">
+
+    <nav>
+        <a href="/" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="/" class="active">Início</a></li>
+            <li><a href="#">Explorar</a></li>
+            <li><a href="#">Registros</a></li>
+            <li><a href="#">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <div class="nav-drawer" id="drawer">
+        <a href="/" class="active">Início</a>
+        <a href="#">Explorar</a>
+        <a href="#">Registros</a>
+        <a href="#">Sobre</a>
+    </div>
+
+    <section class="hero">
+        <p class="hero-eyebrow">Sistema de Genealogia — v4.0</p>
+        <h1 class="hero-title">
+            <span class="line-1">Bem-vindo à</span><br>
+            <span class="line-2">Aurora</span>
+        </h1>
+        <p class="hero-sub">
+            Explore conexões, preserve memórias e redescubra<br>a história que te define.
+        </p>
+        <div class="hero-actions">
+            <a href="comprar.html" class="btn btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Comprar
+            </a>
+            <a href="#" class="btn btn-ghost">Explorar Registros</a>
+        </div>
+        <div class="scroll-hint">
+            <span>Rolar</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-icon"></div>
+        <div class="divider-line"></div>
+    </div>
+
+    <section class="section">
+        <p class="section-label">O que você pode fazer</p>
+        <div class="cards">
+            <div class="card card-1">
+                <div class="card-number">01</div>
+                <h3 class="card-title">Árvore Genealógica</h3>
+                <p class="card-text">Construa e visualize sua árvore familiar de forma interativa, conectando gerações através do tempo.</p>
+            </div>
+            <div class="card card-2">
+                <div class="card-number">02</div>
+                <h3 class="card-title">Registros Históricos</h3>
+                <p class="card-text">Armazene documentos, fotos e memórias. Preserve a história da sua família para as próximas gerações.</p>
+            </div>
+            <div class="card card-3">
+                <div class="card-number">03</div>
+                <h3 class="card-title">Conexões & Memórias</h3>
+                <p class="card-text">Descubra padrões e conexões escondidas entre membros da família através de análise visual de dados.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+
+</div>
+
+<script>
+    /* ═══════════════════════════════════════
+       AURORA CANVAS
+    ═══════════════════════════════════════ */
+    const canvas = document.getElementById('auroraCanvas');
+    const ctx    = canvas.getContext('2d');
+
+    let W, H, stars = [], particles = [];
+    let mouse = { x: 0.5, y: 0.5 };
+
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        buildStars();
+    }
+
+    /* Stars */
+    function buildStars() {
+        stars = [];
+        const n = Math.floor(W * H / 7000);
+        for (let i = 0; i < n; i++) {
+            stars.push({
+                x: Math.random() * W,
+                y: Math.random() * H * 0.65,
+                r: Math.random() * 1.1 + 0.2,
+                base: Math.random(),
+                phase: Math.random() * Math.PI * 2,
+                speed: Math.random() * 0.006 + 0.002,
+            });
+        }
+    }
+
+    /* Aurora wave definitions */
+    const WAVES = [
+        { rgb: [0, 255, 179],  yF: 0.16, amp: 0.08, fq: 0.0007, sp: 0.00016, blur: 85,  a: 0.30 },
+        { rgb: [0, 212, 255],  yF: 0.11, amp: 0.10, fq: 0.0005, sp: 0.00011, blur: 95,  a: 0.24 },
+        { rgb: [123, 47, 255], yF: 0.21, amp: 0.07, fq: 0.0009, sp: 0.00020, blur: 75,  a: 0.20 },
+        { rgb: [255, 79, 216], yF: 0.07, amp: 0.05, fq: 0.0011, sp: 0.00014, blur: 105, a: 0.13 },
+        { rgb: [0, 255, 179],  yF: 0.27, amp: 0.04, fq: 0.0008, sp: 0.00018, blur: 65,  a: 0.11 },
+    ];
+
+    /* Particles */
+    function buildParticles() {
+        particles = [];
+        const n = Math.min(50, Math.floor(W / 30));
+        for (let i = 0; i < n; i++) {
+            particles.push(newParticle(true));
+        }
+    }
+    function newParticle(random) {
+        const w = WAVES[Math.floor(Math.random() * 3)];
+        return {
+            x:    Math.random() * W,
+            y:    random ? Math.random() * H : H * (0.7 + Math.random() * 0.3),
+            vx:   (Math.random() - 0.5) * 0.25,
+            vy:   -(Math.random() * 0.35 + 0.08),
+            r:    Math.random() * 1.4 + 0.4,
+            a:    Math.random() * 0.45 + 0.1,
+            rgb:  w.rgb,
+            life: 0,
+            max:  Math.random() * 280 + 180,
+        };
+    }
+
+    function drawWave(w, t) {
+        const yB  = w.yF * H;
+        const th  = w.amp * H;
+        const mx  = (mouse.x - 0.5) * 25;
+
+        ctx.save();
+        ctx.filter = `blur(${w.blur}px)`;
+
+        const g = ctx.createLinearGradient(0, yB - th * 1.5, 0, yB + th * 2);
+        const [r,g2,b] = w.rgb;
+        g.addColorStop(0,   `rgba(${r},${g2},${b},0)`);
+        g.addColorStop(0.35,`rgba(${r},${g2},${b},${w.a})`);
+        g.addColorStop(0.65,`rgba(${r},${g2},${b},${w.a * 0.6})`);
+        g.addColorStop(1,   `rgba(${r},${g2},${b},0)`);
+
+        ctx.beginPath();
+        ctx.moveTo(0, yB);
+        for (let x = 0; x <= W; x += 3) {
+            const s = t * w.sp * 60000;
+            const y = yB
+                + Math.sin(x * w.fq + s)           * th
+                + Math.sin(x * w.fq * 2.4 + s * 1.5 + 1) * th * 0.35
+                + Math.cos(x * w.fq * 0.6 + s * 0.7)     * th * 0.25
+                + Math.sin(x * 0.002) * mx;
+            ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, 0); ctx.lineTo(0, 0); ctx.closePath();
+        ctx.fillStyle = g;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawStars(t) {
+        for (const s of stars) {
+            const a = (Math.sin(t * s.speed * 1000 + s.phase) * 0.4 + 0.6) * (s.base * 0.5 + 0.5);
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${a})`;
+            ctx.fill();
+        }
+    }
+
+    function drawParticles(dt) {
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.life += dt * 60;
+            p.x += p.vx; p.y += p.vy;
+            const fade = Math.sin((p.life / p.max) * Math.PI);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]},${fade * p.a})`;
+            ctx.fill();
+            if (p.life >= p.max || p.y < -10) particles[i] = newParticle(false);
+        }
+    }
+
+    function drawGround() {
+        const g = ctx.createLinearGradient(0, H * 0.6, 0, H);
+        g.addColorStop(0,   'rgba(0,255,179,0)');
+        g.addColorStop(0.6, 'rgba(0,255,179,0.035)');
+        g.addColorStop(1,   'rgba(0,212,255,0.06)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, H * 0.6, W, H * 0.4);
+    }
+
+    let last = 0, T = 0;
+    function loop(now) {
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now; T += dt;
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#020810';
+        ctx.fillRect(0, 0, W, H);
+
+        drawStars(T);
+        for (const w of WAVES) drawWave(w, T);
+        drawGround();
+        drawParticles(dt);
+
+        requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX / W;
+        mouse.y = e.clientY / H;
+    });
+
+    resize();
+    buildParticles();
+    window.addEventListener('resize', () => { resize(); buildParticles(); });
+    requestAnimationFrame(loop);
+
+    /* ═══════════════════════════════════════
+       HAMBURGER
+    ═══════════════════════════════════════ */
+    const burger = document.getElementById('burger');
+    const drawer = document.getElementById('drawer');
+
+    burger.addEventListener('click', () => {
+        const open = drawer.classList.toggle('open');
+        burger.classList.toggle('open', open);
+    });
+    document.addEventListener('click', e => {
+        if (!burger.contains(e.target) && !drawer.contains(e.target)) {
+            drawer.classList.remove('open');
+            burger.classList.remove('open');
+        }
+    });
+</script>
+</body>
+</html>

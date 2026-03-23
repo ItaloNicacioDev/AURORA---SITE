@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Adquirir Licença</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --aurora-green:  #00ffb3;
+            --aurora-teal:   #00d4ff;
+            --aurora-violet: #7b2fff;
+            --aurora-pink:   #ff4fd8;
+            --deep-space:    #020810;
+            --mid-space:     #060e1c;
+            --glass-bg:      rgba(255,255,255,0.04);
+            --glass-border:  rgba(255,255,255,0.08);
+            --text-primary:  #e8f4f8;
+            --text-muted:    rgba(232,244,248,0.45);
+            --paypal-blue:   #009cde;
+            --pix-teal:      #32bcad;
+            --error:         #ff5f5f;
+            --success:       #00ffb3;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--deep-space);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SKY ── */
+        .sky {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden;
+        }
+        .sky::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                    radial-gradient(ellipse 140% 50% at 50% -5%, rgba(0,212,255,0.10) 0%, transparent 60%),
+                    radial-gradient(ellipse 70% 35% at 15% 8%,  rgba(0,255,179,0.07) 0%, transparent 50%),
+                    radial-gradient(ellipse 70% 35% at 85% 5%,  rgba(123,47,255,0.08) 0%, transparent 50%);
+            animation: skyPulse 14s ease-in-out infinite alternate;
+        }
+        @keyframes skyPulse {
+            0%   { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .ribbon {
+            position: absolute; width: 200%; left: -50%;
+            border-radius: 50%; filter: blur(55px); opacity: 0;
+            animation: ribbonFloat linear infinite;
+        }
+        .ribbon-1 {
+            height: 180px; top: 1%;
+            background: linear-gradient(90deg, transparent 0%, rgba(0,255,179,0.30) 25%, rgba(0,212,255,0.25) 55%, rgba(123,47,255,0.18) 75%, transparent 100%);
+            animation-duration: 20s; animation-delay: 0s;
+        }
+        .ribbon-2 {
+            height: 140px; top: 5%;
+            background: linear-gradient(90deg, transparent 0%, rgba(123,47,255,0.22) 20%, rgba(0,255,179,0.28) 55%, transparent 100%);
+            animation-duration: 28s; animation-delay: -9s;
+        }
+        @keyframes ribbonFloat {
+            0%   { opacity: 0; transform: rotate(-2deg) translateX(-5%); }
+            15%  { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { opacity: 0; transform: rotate(2deg) translateX(5%); }
+        }
+        .stars {
+            position: absolute; inset: 0;
+            background-image:
+                    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6), transparent),
+                    radial-gradient(1px 1px at 30% 7%,  rgba(255,255,255,0.4), transparent),
+                    radial-gradient(1.5px 1.5px at 52% 12%, rgba(255,255,255,0.5), transparent),
+                    radial-gradient(1px 1px at 75% 22%, rgba(255,255,255,0.3), transparent),
+                    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.6), transparent),
+                    radial-gradient(1px 1px at 18% 50%, rgba(255,255,255,0.3), transparent),
+                    radial-gradient(1px 1px at 60% 45%, rgba(255,255,255,0.4), transparent),
+                    radial-gradient(1px 1px at 83% 55%, rgba(255,255,255,0.3), transparent),
+                    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.4), transparent),
+                    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.3), transparent);
+            animation: twinkle 7s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 48px;
+            background: rgba(2,8,16,0.6);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem; font-weight: 300; letter-spacing: 0.18em;
+            color: var(--text-primary); text-decoration: none;
+        }
+        .nav-logo span { color: var(--aurora-green); font-style: italic; }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a {
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase;
+            transition: color 0.3s; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+            height: 1px; background: var(--aurora-green);
+            transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { transform: scaleX(1); }
+        .nav-links a.active { color: var(--aurora-green); }
+        .nav-links a.active::after { transform: scaleX(1); }
+
+        /* ── PAGE ── */
+        .page {
+            position: relative; z-index: 1;
+            min-height: 100vh;
+            padding: 120px 24px 80px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ── HEADER ── */
+        .page-header {
+            text-align: center; margin-bottom: 56px;
+            opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+        }
+        .page-eyebrow {
+            font-size: 0.68rem; letter-spacing: 0.4em;
+            text-transform: uppercase; color: var(--aurora-green); margin-bottom: 16px;
+        }
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 300; line-height: 1;
+        }
+        .page-title em {
+            font-style: italic;
+            background: linear-gradient(135deg, var(--aurora-green), var(--aurora-teal));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-subtitle {
+            margin-top: 16px; font-size: 0.85rem;
+            color: var(--text-muted); letter-spacing: 0.08em; line-height: 1.8;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 28px;
+            width: 100%; max-width: 980px;
+            opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+        }
+
+        /* ── PRODUCT CARD ── */
+        .product-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 36px;
+            backdrop-filter: blur(14px);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            height: fit-content;
+        }
+        .product-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--aurora-green), var(--aurora-teal), transparent);
+        }
+
+        .product-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0,255,179,0.1);
+            border: 1px solid rgba(0,255,179,0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.65rem; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--aurora-green);
+            margin-bottom: 24px; width: fit-content;
+        }
+        .product-badge::before {
+            content: ''; width: 5px; height: 5px;
+            border-radius: 50%; background: var(--aurora-green);
+            animation: dotPulse 2s infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,179,0.6); }
+            50%       { box-shadow: 0 0 0 5px rgba(0,255,179,0); }
+        }
+
+        .product-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; font-weight: 300; margin-bottom: 6px;
+        }
+        .product-version {
+            font-size: 0.72rem; letter-spacing: 0.2em;
+            color: var(--text-muted); text-transform: uppercase; margin-bottom: 28px;
+        }
+
+        .product-features {
+            list-style: none; display: flex; flex-direction: column; gap: 12px;
+            margin-bottom: 32px;
+        }
+        .product-features li {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 0.83rem; color: var(--text-muted); letter-spacing: 0.04em;
+        }
+        .feature-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--aurora-teal); flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(0,212,255,0.6);
+        }
+
+        .price-block {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 24px; margin-top: auto;
+        }
+        .price-label {
+            font-size: 0.68rem; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+        }
+        .price-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem; font-weight: 300; line-height: 1;
+            color: var(--text-primary);
+        }
+        .price-value sup {
+            font-size: 1.2rem; vertical-align: super; color: var(--aurora-green);
+        }
+        .price-note {
+            font-size: 0.7rem; color: var(--text-muted);
+            letter-spacing: 0.08em; margin-top: 4px;
+        }
+
+        /* ── PAYMENT CARD ── */
+        .payment-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        /* tabs */
+        .tabs {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .tab {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 7px; padding: 20px 12px;
+            cursor: pointer; transition: background 0.25s, color 0.25s;
+            border: none; background: transparent; color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+            border-right: 1px solid var(--glass-border); position: relative;
+        }
+        .tab:last-child { border-right: none; }
+        .tab svg { width: 22px; height: 22px; }
+        .tab::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+            height: 2px; transform: scaleX(0); transition: transform 0.3s;
+        }
+        .tab.active { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+        .tab.active::after { transform: scaleX(1); }
+        .tab-paypal.active::after { background: var(--paypal-blue); }
+        .tab-pix.active::after    { background: var(--pix-teal); }
+        .tab-card.active::after   { background: var(--aurora-green); }
+
+        /* panels */
+        .panels { padding: 36px; }
+        .panel { display: none; }
+        .panel.active { display: block; animation: fadeUp 0.35s ease; }
+
+        /* ── PAYPAL PANEL ── */
+        .paypal-hero {
+            text-align: center; padding: 16px 0 28px;
+        }
+        .paypal-logo {
+            display: inline-flex; align-items: center; gap: 4px;
+            margin-bottom: 16px;
+        }
+        .paypal-logo .pp-icon {
+            font-size: 2.2rem; font-weight: 700; font-style: italic;
+        }
+        .paypal-logo .pp-p1 { color: #003087; text-shadow: 0 0 20px rgba(0,48,135,0.5); }
+        .paypal-logo .pp-p2 { color: var(--paypal-blue); text-shadow: 0 0 20px rgba(0,156,222,0.5); }
+        .paypal-logo .pp-al { color: var(--paypal-blue); font-size: 1.8rem; font-weight: 400; }
+        .paypal-desc {
+            font-size: 0.82rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 28px;
+        }
+        .btn-paypal {
+            width: 100%; padding: 15px; border: none; border-radius: 4px;
+            background: linear-gradient(135deg, #009cde, #003087);
+            color: #fff; font-family: 'Rajdhani', sans-serif;
+            font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(0,156,222,0.25);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-paypal:hover {
+            box-shadow: 0 0 50px rgba(0,156,222,0.45); transform: translateY(-2px);
+        }
+        .paypal-secure {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 0.65rem; color: var(--text-muted);
+            letter-spacing: 0.15em; margin-top: 14px;
+        }
+
+        /* ── PIX PANEL ── */
+        .pix-layout {
+            display: flex; flex-direction: column; align-items: center; gap: 24px;
+        }
+        .pix-qr-wrapper {
+            position: relative; width: 180px; height: 180px;
+        }
+        .pix-qr-bg {
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.97);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        /* decorative QR pattern */
+        .qr-pattern {
+            width: 152px; height: 152px;
+            display: grid; grid-template-columns: repeat(15, 1fr);
+            gap: 2px;
+        }
+        .qr-cell {
+            border-radius: 1px;
+            background: transparent;
+        }
+        .qr-cell.filled { background: #111; }
+
+        .pix-glow {
+            position: absolute; inset: -12px;
+            border-radius: 16px;
+            background: radial-gradient(ellipse, rgba(50,188,173,0.25), transparent 70%);
+            animation: pixGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes pixGlow {
+            0%, 100% { opacity: 0.6; }
+            50%       { opacity: 1; }
+        }
+
+        .pix-key-block {
+            width: 100%; text-align: center;
+        }
+        .pix-key-label {
+            font-size: 0.65rem; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--pix-teal); margin-bottom: 8px;
+        }
+        .pix-key-value {
+            font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
+            color: var(--text-primary); letter-spacing: 0.08em;
+        }
+        .btn-copy {
+            margin-top: 12px; padding: 10px 24px;
+            background: rgba(50,188,173,0.12);
+            border: 1px solid rgba(50,188,173,0.3);
+            border-radius: 3px; color: var(--pix-teal);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .btn-copy:hover { background: rgba(50,188,173,0.22); }
+        .btn-copy.copied { color: var(--aurora-green); border-color: rgba(0,255,179,0.4); }
+
+        .pix-notice {
+            font-size: 0.72rem; color: var(--text-muted); text-align: center;
+            line-height: 1.7; letter-spacing: 0.04em;
+        }
+
+        /* ── CARD PANEL ── */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block; font-size: 0.65rem; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .form-input {
+            width: 100%; padding: 12px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border); border-radius: 4px;
+            color: var(--text-primary); font-family: 'Rajdhani', sans-serif;
+            font-size: 0.92rem; letter-spacing: 0.04em;
+            transition: border-color 0.3s, box-shadow 0.3s; outline: none;
+        }
+        .form-input::placeholder { color: rgba(232,244,248,0.2); }
+        .form-input:focus {
+            border-color: rgba(0,255,179,0.4);
+            box-shadow: 0 0 0 3px rgba(0,255,179,0.06);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .card-preview {
+            background: linear-gradient(135deg, rgba(0,255,179,0.08), rgba(0,212,255,0.06));
+            border: 1px solid var(--glass-border);
+            border-radius: 10px; padding: 18px 22px;
+            margin-bottom: 24px; position: relative; overflow: hidden;
+            height: 110px;
+        }
+        .card-preview::before {
+            content: '';
+            position: absolute; top: -30px; right: -30px;
+            width: 120px; height: 120px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,179,0.1), transparent 70%);
+        }
+        .card-chip {
+            width: 32px; height: 24px; border-radius: 4px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.6), rgba(255,215,0,0.3));
+            border: 1px solid rgba(255,215,0,0.4); margin-bottom: 12px;
+        }
+        .card-number-preview {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem; letter-spacing: 0.22em;
+            color: rgba(232,244,248,0.6); font-style: italic;
+        }
+        .card-brands {
+            position: absolute; top: 18px; right: 18px;
+            display: flex; gap: 8px; align-items: center;
+        }
+        .brand-icon {
+            width: 32px; height: 20px; border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.45rem; font-weight: 700; letter-spacing: 0.05em;
+        }
+        .brand-visa {
+            background: rgba(26,31,113,0.5); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; font-size: 0.65rem; font-style: italic; letter-spacing: 0.1em;
+        }
+        .brand-mc {
+            background: transparent; position: relative;
+        }
+        .mc-left, .mc-right {
+            width: 14px; height: 14px; border-radius: 50%; position: absolute;
+        }
+        .mc-left  { background: rgba(235,0,27,0.8); left: 0; }
+        .mc-right { background: rgba(255,94,0,0.8); left: 8px; mix-blend-mode: screen; }
+
+        .btn-pay {
+            width: 100%; padding: 15px; border: none; border-radius: 4px;
+            background: linear-gradient(135deg, var(--aurora-green), var(--aurora-teal));
+            color: var(--deep-space); font-family: 'Rajdhani', sans-serif;
+            font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(0,255,179,0.25);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-pay:hover {
+            box-shadow: 0 0 50px rgba(0,255,179,0.45); transform: translateY(-2px);
+        }
+
+        /* trust badges */
+        .trust-row {
+            display: flex; gap: 20px; justify-content: center;
+            padding-top: 28px; border-top: 1px solid var(--glass-border);
+            margin-top: 28px;
+        }
+        .trust-item {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            font-size: 0.62rem; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .trust-icon { color: var(--aurora-green); }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 32px 48px; border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-muted);
+            width: 100%; max-width: 980px; margin-top: 40px;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav { padding: 16px 20px; }
+            .nav-links { gap: 18px; }
+            .checkout-grid { grid-template-columns: 1fr; }
+            .panels { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sky">
+    <div class="stars"></div>
+    <div class="ribbon ribbon-1"></div>
+    <div class="ribbon ribbon-2"></div>
+</div>
+
+<div class="page">
+
+    <!-- NAV -->
+    <nav>
+        <a href="index.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html">Início</a></li>
+            <li><a href="#">Explorar</a></li>
+            <li><a href="#">Registros</a></li>
+            <li><a href="comprar.html" class="active">Comprar</a></li>
+        </ul>
+    </nav>
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <p class="page-eyebrow">Licença Perpétua</p>
+        <h1 class="page-title">Adquira o <em>Aurora</em></h1>
+        <p class="page-subtitle">Pagamento único · Atualizações vitalícias · Suporte incluído</p>
+    </div>
+
+    <!-- GRID -->
+    <div class="checkout-grid">
+
+        <!-- PRODUCT -->
+        <div class="product-card">
+            <span class="product-badge">Disponível</span>
+            <h2 class="product-name">Aurora</h2>
+            <p class="product-version">Versão 4.0 — Licença Individual</p>
+
+            <ul class="product-features">
+                <li><span class="feature-dot"></span>Árvore genealógica ilimitada</li>
+                <li><span class="feature-dot"></span>Armazenamento local + nuvem</li>
+                <li><span class="feature-dot"></span>Importação de arquivos GEDCOM</li>
+                <li><span class="feature-dot"></span>Modo Animus — linha do tempo visual</li>
+                <li><span class="feature-dot"></span>Relatórios em PDF exportáveis</li>
+                <li><span class="feature-dot"></span>Acesso web + desktop (MAUI)</li>
+                <li><span class="feature-dot"></span>Atualizações da v4.x incluídas</li>
+            </ul>
+
+            <div class="price-block">
+                <p class="price-label">Valor único</p>
+                <div class="price-value"><sup>R$</sup> 97<sup style="font-size:1rem;color:var(--text-muted)">,00</sup></div>
+                <p class="price-note">ou 3× de R$ 34,90 no cartão</p>
+            </div>
+        </div>
+
+        <!-- PAYMENT -->
+        <div class="payment-card">
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab tab-paypal active" onclick="switchTab('paypal')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 11.5C7 11.5 6.5 15 9 16C11.5 17 15 15.5 15.5 12.5C16 9.5 13.5 8 11 8H7.5L7 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M9.5 8L9 12C9 12 8.5 15 11 16C13.5 17 17 15.5 17.5 12.5C18 9.5 15.5 8 13 8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    PayPal
+                </button>
+                <button class="tab tab-pix" onclick="switchTab('pix')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L15.5 6.5L12 10L8.5 6.5L12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M12 14L15.5 17.5L12 21L8.5 17.5L12 14Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M3 12L6.5 8.5L10 12L6.5 15.5L3 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M14 12L17.5 8.5L21 12L17.5 15.5L14 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    Pix
+                </button>
+                <button class="tab tab-card" onclick="switchTab('card')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M6 15H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Cartão
+                </button>
+            </div>
+
+            <!-- PANELS -->
+            <div class="panels">
+
+                <!-- PAYPAL -->
+                <div class="panel panel-paypal active" id="panel-paypal">
+                    <div class="paypal-hero">
+                        <div class="paypal-logo">
+                            <span class="pp-icon pp-p1">P</span>
+                            <span class="pp-icon pp-p2">P</span>
+                            <span class="pp-al">aypal</span>
+                        </div>
+                        <p class="paypal-desc">
+                            Pague de forma rápida e segura com sua conta PayPal.<br>
+                            Você será redirecionado para concluir o pagamento.
+                        </p>
+                        <button class="btn-paypal" onclick="handlePaypal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Pagar com PayPal · R$ 97,00
+                        </button>
+                        <p class="paypal-secure">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Transação protegida e criptografada
+                        </p>
+                    </div>
+
+                    <div class="trust-row">
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            SSL 256-bit
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                            Compra garantida
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                            Entrega imediata
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIX -->
+                <div class="panel panel-pix" id="panel-pix">
+                    <div class="pix-layout">
+                        <div class="pix-qr-wrapper">
+                            <div class="pix-glow"></div>
+                            <div class="pix-qr-bg">
+                                <!-- Decorative QR code pattern -->
+                                <svg width="152" height="152" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- finder patterns -->
+                                    <rect x="8" y="8" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="12" y="12" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="18" y="18" width="22" height="22" rx="2" fill="#111"/>
+
+                                    <rect x="102" y="8" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="106" y="12" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="112" y="18" width="22" height="22" rx="2" fill="#111"/>
+
+                                    <rect x="8" y="102" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="12" y="106" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="18" y="112" width="22" height="22" rx="2" fill="#111"/>
+
+                                    <!-- data modules (decorative) -->
+                                    <rect x="60" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="18" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="26" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="18" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="34" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="34" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="42" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="42" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="42" width="8" height="8" fill="#111"/>
+
+                                    <rect x="8" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="18" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="34" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="42" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="8"  y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="26" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="8"  y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="18" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="34" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="42" y="84" width="8" height="8" fill="#111"/>
+
+                                    <rect x="60" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="84" width="8" height="8" fill="#111"/>
+
+                                    <rect x="60" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="134" width="8" height="8" fill="#111"/>
+
+                                    <!-- Pix logo center overlay -->
+                                    <rect x="60" y="60" width="32" height="32" rx="4" fill="white"/>
+                                    <path d="M76 68 L80 72 L76 76 L72 72 Z" fill="#32bcad"/>
+                                    <path d="M76 76 L80 80 L76 84 L72 80 Z" fill="#32bcad"/>
+                                    <path d="M68 76 L72 72 L76 76 L72 80 Z" fill="#32bcad"/>
+                                    <path d="M80 76 L84 72 L88 76 L84 80 Z" fill="#32bcad"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="pix-key-block">
+                            <p class="pix-key-label">Chave Pix (e-mail)</p>
+                            <p class="pix-key-value">aurora@exemplo.com.br</p>
+                            <button class="btn-copy" id="btnCopy" onclick="copyPix()">Copiar chave</button>
+                        </div>
+
+                        <p class="pix-notice">
+                            Escaneie o QR Code ou copie a chave Pix.<br>
+                            Após o pagamento, envie o comprovante para<br>
+                            <strong style="color:var(--aurora-teal)">suporte@aurora.app</strong> para ativar sua licença.
+                        </p>
+
+                        <div class="trust-row" style="width:100%">
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                                Instantâneo
+                            </div>
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                                Sem taxas
+                            </div>
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Banco Central
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD -->
+                <div class="panel panel-card" id="panel-card">
+                    <div class="card-preview">
+                        <div class="card-chip"></div>
+                        <div class="card-number-preview" id="cardPreview">•••• •••• •••• ••••</div>
+                        <div class="card-brands">
+                            <div class="brand-icon brand-visa">VISA</div>
+                            <div class="brand-icon brand-mc">
+                                <div class="mc-left"></div>
+                                <div class="mc-right"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nome no cartão</label>
+                        <input class="form-input" type="text" placeholder="NOME COMPLETO" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Número do cartão</label>
+                        <input class="form-input" type="text" id="cardNumber"
+                               placeholder="0000 0000 0000 0000" maxlength="19"
+                               oninput="formatCard(this)" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Validade</label>
+                            <input class="form-input" type="text" placeholder="MM/AA" maxlength="5"
+                                   oninput="formatExpiry(this)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input class="form-input" type="text" placeholder="•••" maxlength="3" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Parcelamento</label>
+                        <select class="form-input" style="cursor:pointer">
+                            <option value="1">1× de R$ 97,00 (sem juros)</option>
+                            <option value="3">3× de R$ 34,90 (sem juros)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-pay" onclick="handleCard()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Finalizar compra · R$ 97,00
+                    </button>
+
+                    <div class="trust-row">
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Criptografado
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                            PCI Compliant
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            3D Secure
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <span>Pagamentos seguros · SSL 256-bit</span>
+    </footer>
+
+</div>
+
+<script>
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelector(`.tab-${tab}`).classList.add('active');
+        document.getElementById(`panel-${tab}`).classList.add('active');
+    }
+
+    function formatCard(input) {
+        let v = input.value.replace(/\D/g, '').slice(0, 16);
+        input.value = v.replace(/(.{4})/g, '$1 ').trim();
+        const preview = v.padEnd(16, '•');
+        document.getElementById('cardPreview').textContent =
+            preview.slice(0,4) + ' ' + preview.slice(4,8) + ' ' +
+            preview.slice(8,12) + ' ' + preview.slice(12,16);
+    }
+
+    function formatExpiry(input) {
+        let v = input.value.replace(/\D/g, '').slice(0, 4);
+        if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+        input.value = v;
+    }
+
+    function copyPix() {
+        navigator.clipboard.writeText('aurora@exemplo.com.br').catch(() => {});
+        const btn = document.getElementById('btnCopy');
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = 'Copiar chave';
+            btn.classList.remove('copied');
+        }, 2500);
+    }
+
+    function handlePaypal() {
+        alert('Redirecionando para o PayPal...\n(Integre com a API do PayPal aqui)');
+    }
+
+    function handleCard() {
+        alert('Processando pagamento...\n(Integre com Stripe, PagSeguro ou similar aqui)');
+    }
+</script>
+
+</body>
+</html>
