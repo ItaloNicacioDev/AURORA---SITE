@@ -1,10 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Explorar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --aurora-green:#00ffb3; --aurora-teal:#00d4ff; --aurora-violet:#7b2fff; --aurora-pink:#ff4fd8; --deep-space:#020810; --glass-bg:rgba(255,255,255,0.04); --glass-border:rgba(255,255,255,0.08); --text-primary:#e8f4f8; --text-muted:rgba(232,244,248,0.45); --nav-h:70px; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--deep-space); color: var(--text-primary); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        #auroraCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(2,8,16,0.6); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); }
+        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; letter-spacing: 0.18em; color: var(--text-primary); text-decoration: none; }
+        .nav-logo span { color: var(--aurora-green); font-style: italic; }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--aurora-green); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+        .nav-links a:hover { color: var(--text-primary); } .nav-links a:hover::after { transform: scaleX(1); }
+        .nav-links a.active { color: var(--aurora-green); } .nav-links a.active::after { transform: scaleX(1); }
+        .nav-burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
+        .nav-burger span { display: block; width: 24px; height: 1.5px; background: var(--text-primary); transition: all 0.3s; }
+        .nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .nav-burger.open span:nth-child(2) { opacity: 0; }
+        .nav-burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+        .nav-drawer { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; background: rgba(2,8,16,0.97); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); z-index: 99; padding: 24px 28px; flex-direction: column; animation: drawerDown 0.25s ease; }
+        .nav-drawer.open { display: flex; }
+        .nav-drawer a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 14px 0; border-bottom: 1px solid var(--glass-border); transition: color 0.3s; }
+        .nav-drawer a:last-child { border-bottom: none; }
+        .nav-drawer a:hover, .nav-drawer a.active { color: var(--aurora-green); }
+        @keyframes drawerDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* PAGE CONTENT */
+        .content { flex: 1; padding: calc(var(--nav-h) + 56px) 48px 80px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+        .page-header { text-align: center; margin-bottom: 52px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+        .page-eyebrow { font-size: 0.68rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--aurora-teal); margin-bottom: 14px; }
+        .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 300; line-height: 1; }
+        .page-title em { font-style: italic; background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-subtitle { margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); letter-spacing: 0.08em; line-height: 1.9; }
+
+        /* SEARCH BAR */
+        .search-wrap { opacity: 0; animation: fadeUp 0.8s 0.35s forwards; margin-bottom: 40px; }
+        .search-box { display: flex; align-items: center; gap: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; overflow: hidden; backdrop-filter: blur(14px); transition: border-color 0.3s, box-shadow 0.3s; }
+        .search-box:focus-within { border-color: rgba(0,212,255,0.4); box-shadow: 0 0 0 3px rgba(0,212,255,0.06); }
+        .search-icon { padding: 0 18px; color: var(--aurora-teal); flex-shrink: 0; }
+        .search-input { flex: 1; padding: 16px 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-size: 1rem; letter-spacing: 0.06em; }
+        .search-input::placeholder { color: rgba(232,244,248,0.25); }
+        .search-btn { padding: 16px 28px; background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-green)); color: var(--deep-space); font-family: 'Rajdhani', sans-serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+        .search-btn:hover { box-shadow: inset 0 0 20px rgba(255,255,255,0.1); }
+
+        /* FILTERS */
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px; opacity: 0; animation: fadeUp 0.8s 0.45s forwards; }
+        .filter-chip { padding: 7px 16px; border-radius: 20px; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-muted); cursor: pointer; transition: all 0.25s; }
+        .filter-chip:hover, .filter-chip.active { border-color: rgba(0,212,255,0.4); color: var(--aurora-teal); background: rgba(0,212,255,0.07); }
+
+        /* RESULTS AREA */
+        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; opacity: 0; animation: fadeUp 0.8s 0.55s forwards; }
+        .results-label { font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); }
+        .results-count { font-size: 0.72rem; color: var(--aurora-teal); letter-spacing: 0.15em; }
+
+        .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; opacity: 0; animation: fadeUp 0.8s 0.65s forwards; }
+        .result-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; padding: 24px 28px; backdrop-filter: blur(12px); transition: all 0.3s; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .result-card:hover { transform: translateY(-3px); border-color: rgba(0,212,255,0.25); box-shadow: 0 16px 40px rgba(0,0,0,0.35); }
+        .result-info { display: flex; flex-direction: column; gap: 5px; }
+        .result-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: var(--text-primary); }
+        .result-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+        .result-meta span { font-size: 0.68rem; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; }
+        .result-meta .tag { color: var(--aurora-teal); }
+        .result-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,255,179,0.1)); border: 1px solid rgba(0,212,255,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--aurora-teal); flex-shrink: 0; }
+
+        .empty-state { text-align: center; padding: 80px 24px; opacity: 0; animation: fadeUp 0.8s 0.65s forwards; }
+        .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+        .empty-text { font-size: 0.82rem; color: var(--text-muted); letter-spacing: 0.1em; line-height: 1.8; }
+
+        footer { padding: 28px 48px; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-muted); }
+        footer .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--aurora-green); animation: dotPulse 2.5s ease-in-out infinite; }
+        @keyframes dotPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,179,0.6); } 50% { box-shadow: 0 0 0 6px rgba(0,255,179,0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 640px) {
+            nav { padding: 0 20px; } .nav-links { display: none; } .nav-burger { display: flex; }
+            .content { padding: calc(var(--nav-h) + 36px) 20px 60px; }
+            .results-grid { grid-template-columns: 1fr; }
+            .search-btn { padding: 16px 16px; }
+            footer { flex-direction: column; gap: 14px; text-align: center; padding: 24px 20px; }
+        }
+        @media (min-width: 641px) and (max-width: 900px) { nav { padding: 0 28px; } .nav-links { gap: 22px; } }
+    </style>
 </head>
 <body>
+<canvas id="auroraCanvas"></canvas>
+<div class="page">
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html" class="active">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html" class="active">Explorar</a>
+        <a href="registros.html">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
 
+    <div class="content">
+        <div class="page-header">
+            <p class="page-eyebrow">Busca Genealógica</p>
+            <h1 class="page-title"><em>Explorar</em> a Árvore</h1>
+            <p class="page-subtitle">Busque por nome, nacionalidade ou período histórico.</p>
+        </div>
+
+        <div class="search-wrap">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input class="search-input" id="searchInput" type="text" placeholder="Buscar por nome, nacionalidade…" oninput="handleSearch()" />
+                <button class="search-btn" onclick="handleSearch()">Buscar</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <span class="filter-chip active" onclick="setFilter(this,'todos')">Todos</span>
+            <span class="filter-chip" onclick="setFilter(this,'vivos')">Vivos</span>
+            <span class="filter-chip" onclick="setFilter(this,'falecidos')">Falecidos</span>
+        </div>
+
+        <div class="results-header">
+            <span class="results-label">Resultados</span>
+            <span class="results-count" id="resultsCount">Carregando…</span>
+        </div>
+
+        <div id="resultsGrid" class="results-grid"></div>
+        <div id="emptyState" class="empty-state" style="display:none">
+            <div class="empty-icon">◌</div>
+            <p class="empty-text">Nenhuma pessoa encontrada.<br>Tente outro termo ou <a href="cadastro.html" style="color:var(--aurora-green)">cadastre a primeira</a>.</p>
+        </div>
+    </div>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+</div>
+
+<script src="aurora-canvas.js"></script>
+<script>
+    initAurora('auroraCanvas');
+
+    const burger = document.getElementById('burger');
+    const drawer = document.getElementById('drawer');
+    burger.addEventListener('click', () => { const o = drawer.classList.toggle('open'); burger.classList.toggle('open', o); });
+    document.addEventListener('click', e => { if (!burger.contains(e.target) && !drawer.contains(e.target)) { drawer.classList.remove('open'); burger.classList.remove('open'); } });
+
+    let allData = [], activeFilter = 'todos';
+
+    async function loadData() {
+        try {
+            const res = await fetch('/api/cadastro');
+            if (res.ok) {
+                allData = await res.json();
+            } else {
+                allData = [];
+            }
+        } catch {
+            allData = [];
+        }
+        renderResults();
+    }
+
+    function setFilter(el, f) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        activeFilter = f;
+        renderResults();
+    }
+
+    function handleSearch() { renderResults(); }
+
+    function renderResults() {
+        const q = document.getElementById('searchInput').value.trim().toLowerCase();
+        let data = allData;
+
+        if (activeFilter === 'vivos')     data = data.filter(p => !p.ano_morte);
+        if (activeFilter === 'falecidos') data = data.filter(p =>  p.ano_morte);
+        if (q) data = data.filter(p =>
+            (p.nome || '').toLowerCase().includes(q) ||
+            (p.nacionalidade || '').toLowerCase().includes(q) ||
+            (p.descendencia  || '').toLowerCase().includes(q)
+        );
+
+        const grid  = document.getElementById('resultsGrid');
+        const empty = document.getElementById('emptyState');
+        document.getElementById('resultsCount').textContent = `${data.length} pessoa${data.length !== 1 ? 's' : ''}`;
+
+        if (data.length === 0) {
+            grid.style.display  = 'none';
+            empty.style.display = 'block';
+            return;
+        }
+        grid.style.display  = 'grid';
+        empty.style.display = 'none';
+
+        grid.innerHTML = data.map(p => {
+            const initials = (p.nome || '?').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+            const status   = p.ano_morte ? `† ${p.ano_morte}` : 'Vivo(a)';
+            const statusColor = p.ano_morte ? 'color:var(--aurora-violet)' : 'color:var(--aurora-green)';
+            return `
+            <div class="result-card">
+                <div class="result-info">
+                    <div class="result-name">${p.nome || '—'}</div>
+                    <div class="result-meta">
+                        <span class="tag">${p.nacionalidade || '—'}</span>
+                        <span>${p.data_nasc ? 'Nasc. ' + p.data_nasc : '—'}</span>
+                        <span style="${statusColor}">${status}</span>
+                    </div>
+                </div>
+                <div class="result-avatar">${initials}</div>
+            </div>`;
+        }).join('');
+    }
+
+    loadData();
+</script>
 </body>
 </html>

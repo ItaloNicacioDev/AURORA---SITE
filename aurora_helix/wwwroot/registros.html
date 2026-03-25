@@ -1,10 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Registros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --aurora-green:#00ffb3; --aurora-teal:#00d4ff; --aurora-violet:#7b2fff; --aurora-pink:#ff4fd8; --deep-space:#020810; --glass-bg:rgba(255,255,255,0.04); --glass-border:rgba(255,255,255,0.08); --text-primary:#e8f4f8; --text-muted:rgba(232,244,248,0.45); --nav-h:70px; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--deep-space); color: var(--text-primary); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        #auroraCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(2,8,16,0.6); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); }
+        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; letter-spacing: 0.18em; color: var(--text-primary); text-decoration: none; }
+        .nav-logo span { color: var(--aurora-green); font-style: italic; }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--aurora-green); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+        .nav-links a:hover { color: var(--text-primary); } .nav-links a:hover::after { transform: scaleX(1); }
+        .nav-links a.active { color: var(--aurora-green); } .nav-links a.active::after { transform: scaleX(1); }
+        .nav-burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
+        .nav-burger span { display: block; width: 24px; height: 1.5px; background: var(--text-primary); transition: all 0.3s; }
+        .nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .nav-burger.open span:nth-child(2) { opacity: 0; }
+        .nav-burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+        .nav-drawer { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; background: rgba(2,8,16,0.97); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); z-index: 99; padding: 24px 28px; flex-direction: column; animation: drawerDown 0.25s ease; }
+        .nav-drawer.open { display: flex; }
+        .nav-drawer a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 14px 0; border-bottom: 1px solid var(--glass-border); transition: color 0.3s; }
+        .nav-drawer a:last-child { border-bottom: none; }
+        .nav-drawer a:hover, .nav-drawer a.active { color: var(--aurora-green); }
+        @keyframes drawerDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+        .content { flex: 1; padding: calc(var(--nav-h) + 56px) 48px 80px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+        .header-left {}
+        .page-eyebrow { font-size: 0.68rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--aurora-violet); margin-bottom: 10px; }
+        .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 300; }
+        .page-title em { font-style: italic; background: linear-gradient(135deg, var(--aurora-violet), var(--aurora-teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .btn-new { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: linear-gradient(135deg, var(--aurora-green), var(--aurora-teal)); color: var(--deep-space); font-family: 'Rajdhani', sans-serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; border-radius: 3px; text-decoration: none; transition: all 0.3s; box-shadow: 0 0 20px rgba(0,255,179,0.2); }
+        .btn-new:hover { box-shadow: 0 0 40px rgba(0,255,179,0.45); transform: translateY(-2px); }
+
+        /* STATS ROW */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; opacity: 0; animation: fadeUp 0.8s 0.35s forwards; }
+        .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; padding: 20px 24px; backdrop-filter: blur(12px); }
+        .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; color: var(--stat-color, var(--aurora-green)); line-height: 1; }
+        .stat-label { font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+        .stat-1 { --stat-color: var(--aurora-green); }
+        .stat-2 { --stat-color: var(--aurora-teal); }
+        .stat-3 { --stat-color: var(--aurora-violet); }
+        .stat-4 { --stat-color: var(--aurora-pink); }
+
+        /* TABLE */
+        .table-wrap { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; backdrop-filter: blur(14px); overflow: hidden; opacity: 0; animation: fadeUp 0.8s 0.45s forwards; position: relative; }
+        .table-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--aurora-violet), var(--aurora-teal), transparent); }
+
+        .table-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--glass-border); gap: 16px; flex-wrap: wrap; }
+        .toolbar-label { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); }
+        .toolbar-search { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 4px; padding: 8px 14px; transition: border-color 0.3s; }
+        .toolbar-search:focus-within { border-color: rgba(0,212,255,0.35); }
+        .toolbar-search input { background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; width: 180px; }
+        .toolbar-search input::placeholder { color: rgba(232,244,248,0.2); }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { border-bottom: 1px solid var(--glass-border); }
+        th { padding: 14px 20px; text-align: left; font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; cursor: default; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        td { padding: 14px 20px; font-size: 0.85rem; color: var(--text-primary); }
+        .td-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 300; }
+        .td-id { color: var(--text-muted); font-size: 0.72rem; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; }
+        .badge-vivo { background: rgba(0,255,179,0.1); border: 1px solid rgba(0,255,179,0.25); color: var(--aurora-green); }
+        .badge-falecido { background: rgba(123,47,255,0.1); border: 1px solid rgba(123,47,255,0.25); color: var(--aurora-violet); }
+
+        .empty-row td { text-align: center; padding: 60px; color: var(--text-muted); font-size: 0.82rem; letter-spacing: 0.1em; }
+
+        footer { padding: 28px 48px; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-muted); }
+        footer .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--aurora-green); animation: dotPulse 2.5s ease-in-out infinite; }
+        @keyframes dotPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,179,0.6); } 50% { box-shadow: 0 0 0 6px rgba(0,255,179,0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } th:nth-child(n+5), td:nth-child(n+5) { display: none; } }
+        @media (max-width: 640px) {
+            nav { padding: 0 20px; } .nav-links { display: none; } .nav-burger { display: flex; }
+            .content { padding: calc(var(--nav-h) + 36px) 16px 60px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .table-toolbar { flex-direction: column; align-items: flex-start; }
+            th:nth-child(n+4), td:nth-child(n+4) { display: none; }
+            footer { flex-direction: column; gap: 14px; text-align: center; padding: 24px 20px; }
+        }
+        @media (min-width: 641px) and (max-width: 900px) { nav { padding: 0 28px; } .nav-links { gap: 22px; } }
+    </style>
 </head>
 <body>
+<canvas id="auroraCanvas"></canvas>
+<div class="page">
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html" class="active">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="registros.html" class="active">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
 
+    <div class="content">
+        <div class="page-header">
+            <div class="header-left">
+                <p class="page-eyebrow">Banco de dados</p>
+                <h1 class="page-title">Todos os <em>Registros</em></h1>
+            </div>
+            <a href="cadastro.html" class="btn-new">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Novo cadastro
+            </a>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card stat-1"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total de pessoas</div></div>
+            <div class="stat-card stat-2"><div class="stat-value" id="statVivos">—</div><div class="stat-label">Vivos</div></div>
+            <div class="stat-card stat-3"><div class="stat-value" id="statFalecidos">—</div><div class="stat-label">Falecidos</div></div>
+            <div class="stat-card stat-4"><div class="stat-value" id="statNac">—</div><div class="stat-label">Nacionalidades</div></div>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-toolbar">
+                <span class="toolbar-label" id="tableLabel">Carregando…</span>
+                <div class="toolbar-search">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(232,244,248,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="tableSearch" placeholder="Filtrar…" oninput="filterTable()" />
+                </div>
+            </div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Nascimento</th>
+                        <th>Nacionalidade</th>
+                        <th>Descendência</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+</div>
+
+<script src="aurora-canvas.js"></script>
+<script>
+    initAurora('auroraCanvas');
+
+    const burger = document.getElementById('burger');
+    const drawer = document.getElementById('drawer');
+    burger.addEventListener('click', () => { const o = drawer.classList.toggle('open'); burger.classList.toggle('open', o); });
+    document.addEventListener('click', e => { if (!burger.contains(e.target) && !drawer.contains(e.target)) { drawer.classList.remove('open'); burger.classList.remove('open'); } });
+
+    let allData = [];
+
+    async function loadData() {
+        try {
+            const res = await fetch('/api/cadastro');
+            allData = res.ok ? await res.json() : [];
+        } catch { allData = []; }
+        updateStats();
+        renderTable();
+    }
+
+    function updateStats() {
+        const vivos     = allData.filter(p => !p.ano_morte).length;
+        const falecidos = allData.filter(p =>  p.ano_morte).length;
+        const nacs      = new Set(allData.map(p => p.nacionalidade).filter(Boolean)).size;
+        document.getElementById('statTotal').textContent     = allData.length;
+        document.getElementById('statVivos').textContent     = vivos;
+        document.getElementById('statFalecidos').textContent = falecidos;
+        document.getElementById('statNac').textContent       = nacs;
+    }
+
+    function filterTable() { renderTable(); }
+
+    function renderTable() {
+        const q = document.getElementById('tableSearch').value.trim().toLowerCase();
+        const data = q ? allData.filter(p =>
+            (p.nome || '').toLowerCase().includes(q) ||
+            (p.nacionalidade || '').toLowerCase().includes(q) ||
+            (p.descendencia || '').toLowerCase().includes(q)
+        ) : allData;
+
+        document.getElementById('tableLabel').textContent = `${data.length} registro${data.length !== 1 ? 's' : ''}`;
+
+        const body = document.getElementById('tableBody');
+        if (data.length === 0) {
+            body.innerHTML = `<tr class="empty-row"><td colspan="6">Nenhum registro encontrado. <a href="cadastro.html" style="color:var(--aurora-green)">Cadastrar pessoa</a></td></tr>`;
+            return;
+        }
+        body.innerHTML = data.map(p => {
+            const badge = p.ano_morte
+                ? `<span class="badge badge-falecido">† ${p.ano_morte}</span>`
+                : `<span class="badge badge-vivo">Vivo(a)</span>`;
+            return `
+            <tr>
+                <td class="td-id">${p.id}</td>
+                <td class="td-name">${p.nome || '—'}</td>
+                <td>${p.data_nasc || '—'}</td>
+                <td>${p.nacionalidade || '—'}</td>
+                <td>${p.descendencia || '—'}</td>
+                <td>${badge}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    loadData();
+</script>
 </body>
 </html>
