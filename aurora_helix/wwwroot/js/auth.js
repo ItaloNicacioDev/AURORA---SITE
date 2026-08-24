@@ -2,7 +2,7 @@
    AURORA — Sessão / Conta
    · mantém a sessão em localStorage
    · esconde [data-auth="required"] / [data-auth="anon"] / [data-auth="user"]
-   · abre um modal com login E criação de conta (backend real)
+   · modal com login e criação de conta (com aceite de termos LGPD)
    ============================================================ */
 (function () {
     'use strict';
@@ -50,6 +50,7 @@
                 persist({ token: data.token || ('aurora-' + Date.now()), email: email });
                 return { ok: true };
             }
+            if (res.status === 403) return { ok: false, error: (await res.json().catch(() => ({}))).erro || 'Conta aguardando verificação de e-mail.' };
             if (res.status === 401) return { ok: false, error: 'Credenciais inválidas.' };
             const msg = await res.json().catch(function () { return null; });
             return { ok: false, error: (msg && msg.erro) || 'Falha ao entrar.' };
@@ -58,15 +59,18 @@
         }
     }
 
-    /* ── Backend: registro de usuário ── */
-    async function registro(email, password, nome) {
+    /* ── Backend: registro de usuário (com consentimento) ── */
+    async function registro(email, password, nome, aceiteTermos, versaoTermos) {
         try {
             const res = await fetch('/api/auth/registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, senha: password, nome: nome })
+                body: JSON.stringify({
+                    email: email, senha: password, nome: nome,
+                    aceiteTermos: aceiteTermos, versaoTermos: versaoTermos
+                })
             });
-            if (res.ok) return { ok: true };
+            if (res.ok) return await res.json();
             const msg = await res.json().catch(function () { return null; });
             if (res.status === 409) return { ok: false, error: (msg && msg.erro) || 'E-mail já cadastrado.' };
             return { ok: false, error: (msg && msg.erro) || 'Falha ao criar conta.' };
@@ -107,18 +111,21 @@
         const title = document.getElementById('authTitle');
         const sub   = document.getElementById('authSub');
         const nameField = document.getElementById('authNameField');
+        const consentField = document.getElementById('authConsentField');
         const submit = document.getElementById('authSubmit');
         const toggle = document.getElementById('authToggle');
         if (m === 'register') {
             title.textContent = 'Criar conta';
             sub.textContent = 'Cadastre-se para acessar o Aurora.';
             nameField.style.display = '';
+            consentField.style.display = '';
             submit.textContent = 'Criar conta';
             toggle.innerHTML = 'Já tem conta? <a href="#" id="authToggleLink">Entrar</a>';
         } else {
             title.textContent = 'Entrar';
             sub.textContent = 'Acesse sua conta para registrar ancestrais.';
             nameField.style.display = 'none';
+            consentField.style.display = 'none';
             submit.textContent = 'Entrar';
             toggle.innerHTML = 'Não tem conta? <a href="#" id="authToggleLink">Criar conta</a>';
         }
@@ -150,6 +157,14 @@
                 '<div class="auth-field">' +
                     '<label>Senha</label>' +
                     '<input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password" />' +
+                '</div>' +
+                '<div class="auth-field" id="authConsentField" style="display:none">' +
+                    '<label style="display:flex;align-items:flex-start;gap:8px;font-size:0.72rem;' +
+                        'text-transform:none;letter-spacing:0.02em;line-height:1.45;color:var(--text-muted);cursor:pointer">' +
+                        '<input type="checkbox" id="authConsent" style="margin-top:2px;width:auto" />' +
+                        '<span>Declaro que as informações são verídicas e estou ciente da LGPD ' +
+                        '(Lei nº 13.709/2018). <a href="#" style="color:var(--aurora-green)">Ver termos (v' + VERSAO_TERMOS + ')</a></span>' +
+                    '</label>' +
                 '</div>' +
                 '<div class="auth-error" id="authError"></div>' +
                 '<button class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center">Entrar</button>' +
@@ -189,17 +204,34 @@
 
         if (mode === 'register') {
             const nome = document.getElementById('authName').value.trim();
-            const r = await registro(email, pass, nome);
+            const consent = document.getElementById('authConsent');
+            if (!consent.checked) {
+                errEl.textContent = 'É necessário aceitar os termos para continuar.';
+                return;
+            }
+            const r = await registro(email, pass, nome, true, VERSAO_TERMOS);
             if (!r.ok) { errEl.textContent = r.error || 'Não foi possível criar a conta.'; return; }
-            const l = await login(email, pass);
-            if (l.ok) { closeLogin(); }
-            else { errEl.textContent = l.error || 'Conta criada, mas falha ao entrar.'; }
+
+            // Sucesso: mostra o link de verificação (modo demo)
+            const modal = document.querySelector('.auth-modal');
+            modal.innerHTML =
+                '<h3>Conta criada</h3>' +
+                '<p class="sub">' + (r.mensagem || 'Verifique seu e-mail para ativar a conta.') + '</p>' +
+                (r.verificacaoUrl
+                    ? '<p style="margin:4px 0 18px"><a href="' + r.verificacaoUrl +
+                      '" target="_blank" rel="noopener" style="color:var(--aurora-green)">' +
+                      'Abrir link de verificação (modo demo)</a></p>'
+                    : '') +
+                '<button class="btn btn-primary" id="authOk" style="width:100%;justify-content:center">Fechar</button>';
+            document.getElementById('authOk').addEventListener('click', closeLogin);
         } else {
             const r = await login(email, pass);
             if (r.ok) { closeLogin(); }
             else { errEl.textContent = r.error || 'Não foi possível entrar.'; }
         }
     }
+
+    const VERSAO_TERMOS = '1.0';
 
     window.AuroraAuth = {
         isLoggedIn: isLoggedIn,

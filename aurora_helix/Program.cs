@@ -410,7 +410,6 @@ async Task<(bool, string)> ConfirmarEmail(string token)
             return (true, "Sua conta já está verificada. Você pode fazer login.");
 
         // Ativa a conta e invalida o token (impede reutilização)
-        await using var conn2 = conn; // reutiliza a mesma conexão
         await using var upd = new NpgsqlCommand("""
             UPDATE usuarios
             SET email_verificado = true,
