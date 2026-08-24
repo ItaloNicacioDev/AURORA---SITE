@@ -1,11 +1,8 @@
 /* ============================================================
-   AURORA — Sessão / Conta (gate de login)
+   AURORA — Sessão / Conta
    · mantém a sessão em localStorage
-   · esconde elementos [data-auth="required"] quando deslogado
-   · mostra controles de conta na nav (Entrar / Sair)
-   · abre um modal de login simples
-   Nota: gate de UI. Para segurança real, o back-end também
-   precisa exigir o token (ver Program.cs /api/auth/login).
+   · esconde [data-auth="required"] / [data-auth="anon"] / [data-auth="user"]
+   · abre um modal com login E criação de conta (backend real)
    ============================================================ */
 (function () {
     'use strict';
@@ -24,7 +21,6 @@
     }
     function clear() { persist(null); }
 
-    /* ── Aplica a visibilidade conforme o estado ── */
     function apply() {
         document.querySelectorAll('[data-auth="required"]').forEach(function (el) {
             el.style.display = isLoggedIn() ? '' : 'none';
@@ -40,7 +36,7 @@
         });
     }
 
-    /* ── Login (tenta o back-end; cai no modo demo se não houver API) ── */
+    /* ── Backend: login ── */
     async function login(email, password) {
         if (!email || !password) return { ok: false, error: 'Preencha e-mail e senha.' };
         try {
@@ -55,17 +51,32 @@
                 return { ok: true };
             }
             if (res.status === 401) return { ok: false, error: 'Credenciais inválidas.' };
-            throw new Error('bad');
+            const msg = await res.json().catch(function () { return null; });
+            return { ok: false, error: (msg && msg.erro) || 'Falha ao entrar.' };
         } catch (e) {
-            // modo demo: sem back-end, aceita qualquer par não vazio
-            persist({ token: 'demo-' + Date.now(), email: email });
-            return { ok: true };
+            return { ok: false, error: 'Erro de conexão com o servidor.' };
+        }
+    }
+
+    /* ── Backend: registro de usuário ── */
+    async function registro(email, password, nome) {
+        try {
+            const res = await fetch('/api/auth/registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, senha: password, nome: nome })
+            });
+            if (res.ok) return { ok: true };
+            const msg = await res.json().catch(function () { return null; });
+            if (res.status === 409) return { ok: false, error: (msg && msg.erro) || 'E-mail já cadastrado.' };
+            return { ok: false, error: (msg && msg.erro) || 'Falha ao criar conta.' };
+        } catch (e) {
+            return { ok: false, error: 'Erro de conexão com o servidor.' };
         }
     }
 
     function logout() { clear(); }
 
-    /* ── Controles na nav ── */
     function updateNav() {
         document.querySelectorAll('.nav-account .nav-account-user').forEach(function (el) {
             if (isLoggedIn()) el.textContent = (session.email || 'Conta');
@@ -87,8 +98,37 @@
         apply();
     }
 
-    /* ── Modal de login ── */
+    /* ── Modal de login / criação de conta ── */
+    let mode = 'login';
     let modalEl = null;
+
+    function setMode(m) {
+        mode = m;
+        const title = document.getElementById('authTitle');
+        const sub   = document.getElementById('authSub');
+        const nameField = document.getElementById('authNameField');
+        const submit = document.getElementById('authSubmit');
+        const toggle = document.getElementById('authToggle');
+        if (m === 'register') {
+            title.textContent = 'Criar conta';
+            sub.textContent = 'Cadastre-se para acessar o Aurora.';
+            nameField.style.display = '';
+            submit.textContent = 'Criar conta';
+            toggle.innerHTML = 'Já tem conta? <a href="#" id="authToggleLink">Entrar</a>';
+        } else {
+            title.textContent = 'Entrar';
+            sub.textContent = 'Acesse sua conta para registrar ancestrais.';
+            nameField.style.display = 'none';
+            submit.textContent = 'Entrar';
+            toggle.innerHTML = 'Não tem conta? <a href="#" id="authToggleLink">Criar conta</a>';
+        }
+        const link = document.getElementById('authToggleLink');
+        if (link) link.addEventListener('click', function (e) {
+            e.preventDefault();
+            setMode(m === 'login' ? 'register' : 'login');
+        });
+    }
+
     function injectModal() {
         if (document.getElementById('authModal')) return;
         const back = document.createElement('div');
@@ -97,8 +137,12 @@
         back.innerHTML =
             '<div class="auth-modal">' +
                 '<button class="auth-close" id="authClose" aria-label="Fechar">×</button>' +
-                '<h3>Entrar</h3>' +
-                '<p class="sub">Acesse sua conta para registrar ancestrais.</p>' +
+                '<h3 id="authTitle">Entrar</h3>' +
+                '<p class="sub" id="authSub">Acesse sua conta para registrar ancestrais.</p>' +
+                '<div class="auth-field" id="authNameField" style="display:none">' +
+                    '<label>Nome</label>' +
+                    '<input type="text" id="authName" placeholder="Seu nome (opcional)" />' +
+                '</div>' +
                 '<div class="auth-field">' +
                     '<label>E-mail</label>' +
                     '<input type="email" id="authEmail" placeholder="voce@exemplo.com" autocomplete="username" />' +
@@ -109,6 +153,7 @@
                 '</div>' +
                 '<div class="auth-error" id="authError"></div>' +
                 '<button class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center">Entrar</button>' +
+                '<p class="auth-toggle" id="authToggle">Não tem conta? <a href="#" id="authToggleLink">Criar conta</a></p>' +
             '</div>';
         document.body.appendChild(back);
         modalEl = back;
@@ -119,9 +164,12 @@
         back.querySelector('#authPass').addEventListener('keydown', function (e) {
             if (e.key === 'Enter') submit();
         });
+        setMode('login');
     }
+
     function openLogin() {
         injectModal();
+        setMode('login');
         const back = document.getElementById('authModal');
         back.classList.add('open');
         const email = document.getElementById('authEmail');
@@ -131,14 +179,26 @@
         const back = document.getElementById('authModal');
         if (back) back.classList.remove('open');
     }
+
     async function submit() {
         const email = document.getElementById('authEmail').value.trim();
         const pass  = document.getElementById('authPass').value;
         const errEl = document.getElementById('authError');
         errEl.textContent = '';
-        const r = await login(email, pass);
-        if (r.ok) { closeLogin(); }
-        else { errEl.textContent = r.error || 'Não foi possível entrar.'; }
+        if (!email || !pass) { errEl.textContent = 'Informe e-mail e senha.'; return; }
+
+        if (mode === 'register') {
+            const nome = document.getElementById('authName').value.trim();
+            const r = await registro(email, pass, nome);
+            if (!r.ok) { errEl.textContent = r.error || 'Não foi possível criar a conta.'; return; }
+            const l = await login(email, pass);
+            if (l.ok) { closeLogin(); }
+            else { errEl.textContent = l.error || 'Conta criada, mas falha ao entrar.'; }
+        } else {
+            const r = await login(email, pass);
+            if (r.ok) { closeLogin(); }
+            else { errEl.textContent = r.error || 'Não foi possível entrar.'; }
+        }
     }
 
     window.AuroraAuth = {

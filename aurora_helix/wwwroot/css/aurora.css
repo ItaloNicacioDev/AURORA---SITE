@@ -217,6 +217,9 @@ footer .dot {
 .auth-error { color: var(--error); font-size: 0.7rem; min-height: 1em; margin-bottom: 10px; letter-spacing: 0.06em; }
 .auth-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 1.4rem; line-height: 1; cursor: pointer; }
 .auth-close:hover { color: var(--text-primary); }
+.auth-toggle { margin-top: 16px; font-size: 0.85rem; color: var(--text-muted); text-align: center; letter-spacing: 0.03em; }
+.auth-toggle a { color: var(--aurora-green); text-decoration: none; font-weight: 600; }
+.auth-toggle a:hover { text-decoration: underline; }
 
 @media (max-width: 640px) {
     .nav-account { margin-left: 12px; }

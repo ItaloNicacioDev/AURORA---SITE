@@ -1,11 +1,9 @@
 // ══════════════════════════════════════════════════════════
 //  Program.cs  —  Aurora Web API + Static Files
-// ══════════════════════════════════════════════════════════
-// Dependência: adicione ao projeto via NuGet:
-//   dotnet add package Npgsql
-// ══════════════════════════════════════════════════════════
-
+// ═══════════════════γ═════════════════════════════════════
 using Npgsql;
+using System.Text;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 var app     = builder.Build();
@@ -13,15 +11,49 @@ var app     = builder.Build();
 // ── Servir arquivos estáticos (css, js, imagens em wwwroot) ─
 app.UseStaticFiles();
 
-// String de conexão — ajuste conforme seu container
+// String de conexão — ajuste a senha (SUA_SENHA) conforme seu container
 const string connStr =
     "Host=localhost;Port=5432;Database=aurora;Username=postgres;Password=SUA_SENHA";
+
+// Segredo usado para assinar os tokens de sessão (altere em produção)
+const string TokenSecret = "aurora-helix-chave-super-secreta-altere-me";
 
 // Páginas HTML (estão em wwwroot/html)
 var pages = new[] { "home", "explorar", "registros", "sobre", "cadastro", "comprar" };
 
 string PagePath(string name) =>
     Path.Combine(app.Environment.ContentRootPath, "wwwroot", "html", name + ".html");
+
+// ── Cria as tabelas necessárias (best-effort) ao iniciar ──
+try
+{
+    await using var conn = new NpgsqlConnection(connStr);
+    await conn.OpenAsync();
+    await using var cmd = new NpgsqlCommand("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            senha_hash TEXT NOT NULL,
+            nome TEXT,
+            criado_em TIMESTAMP NOT NULL DEFAULT now()
+        );
+        CREATE TABLE IF NOT EXISTS cadastro (
+            id SERIAL PRIMARY KEY,
+            nome TEXT NOT NULL,
+            data_nasc TEXT,
+            nacionalidade TEXT,
+            descendencia TEXT,
+            ano_morte TEXT,
+            informacoes_add TEXT,
+            sequencia_dna TEXT
+        );
+        """, conn);
+    await cmd.ExecuteNonQueryAsync();
+}
+catch
+{
+    // Não interrompe a aplicação se o banco não estiver disponível
+}
 
 // ── Rota raiz → home ────────────────────────────────────────
 app.MapGet("/", () =>
@@ -35,18 +67,79 @@ app.MapGet("/{page}.html", (string page) =>
     return Results.File(PagePath(page), "text/html; charset=utf-8");
 });
 
-// POST /api/auth/login — DEMO (trocar por Identity/JWT real).
-// Retorna um token simples se as credenciais baterem.
-app.MapPost("/api/auth/login", (LoginDto dto) =>
+// ── POST /api/auth/registro ───────────────────────────────
+app.MapPost("/api/auth/registro", async (RegistroDto dto) =>
 {
-    const string demoEmail = "admin@aurora.app";
-    const string demoPass  = "aurora123";
-    if (dto.Email == demoEmail && dto.Password == demoPass)
-        return Results.Ok(new { token = "aurora-" + Guid.NewGuid() });
-    return Results.Unauthorized();
+    if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Senha))
+        return Results.BadRequest(new { erro = "Informe e-mail e senha." });
+
+    var email = dto.Email.Trim().ToLowerInvariant();
+
+    try
+    {
+        await using var conn = new NpgsqlConnection(connStr);
+        await conn.OpenAsync();
+
+        await using (var check = new NpgsqlCommand(
+            "SELECT 1 FROM usuarios WHERE email = @email", conn))
+        {
+            check.Parameters.AddWithValue("@email", email);
+            if (await check.ExecuteScalarAsync() != null)
+                return Results.Conflict(new { erro = "Este e-mail já está cadastrado." });
+        }
+
+        await using var cmd = new NpgsqlCommand(
+            "INSERT INTO usuarios (email, senha_hash, nome) VALUES (@email, @senha_hash, @nome)",
+            conn);
+        cmd.Parameters.AddWithValue("@email", email);
+        cmd.Parameters.AddWithValue("@senha_hash", HashPassword(dto.Senha));
+        cmd.Parameters.AddWithValue("@nome", (object?)dto.Nome?.Trim() ?? DBNull.Value);
+        await cmd.ExecuteNonQueryAsync();
+
+        return Results.Ok(new { mensagem = "Conta criada com sucesso." });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Não foi possível criar a conta: " + ex.Message);
+    }
 });
 
-// GET /api/cadastro — lista registros (usado por registros.html e explorar.html).
+// ── POST /api/auth/login ───────────────────────────────────
+app.MapPost("/api/auth/login", async (LoginDto dto) =>
+{
+    if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+        return Results.BadRequest(new { erro = "Informe e-mail e senha." });
+
+    var email = dto.Email.Trim().ToLowerInvariant();
+
+    try
+    {
+        await using var conn = new NpgsqlConnection(connStr);
+        await conn.OpenAsync();
+
+        await using var cmd = new NpgsqlCommand(
+            "SELECT id, senha_hash FROM usuarios WHERE email = @email", conn);
+        cmd.Parameters.AddWithValue("@email", email);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync())
+            return Results.Unauthorized();
+
+        var userId = reader.GetInt32(0);
+        var hash   = reader.GetString(1);
+
+        if (!VerifyPassword(dto.Password, hash))
+            return Results.Unauthorized();
+
+        return Results.Ok(new { token = IssueToken(userId), email = dto.Email });
+    }
+    catch
+    {
+        return Results.Unauthorized();
+    }
+});
+
+// ── GET /api/cadastro ─────────────────────────────────────
 app.MapGet("/api/cadastro", async () =>
 {
     try
@@ -83,16 +176,19 @@ app.MapGet("/api/cadastro", async () =>
     }
     catch
     {
-        // Sem banco disponível: degrade graciosamente (lista vazia)
         return Results.Ok(Array.Empty<object>());
     }
 });
 
-// POST /api/cadastro (exige token de sessão Bearer).
+// ── POST /api/cadastro (exige token de sessão válido) ─────
 app.MapPost("/api/cadastro", async (CadastroDto dto, HttpContext ctx) =>
 {
     var auth = ctx.Request.Headers["Authorization"].ToString();
-    if (string.IsNullOrWhiteSpace(auth) || !auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+    if (!auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        return Results.Unauthorized();
+
+    var token = auth["Bearer ".Length..].Trim();
+    if (!TryValidateToken(token, out _))
         return Results.Unauthorized();
 
     await using var conn = new NpgsqlConnection(connStr);
@@ -112,8 +208,6 @@ app.MapPost("/api/cadastro", async (CadastroDto dto, HttpContext ctx) =>
     cmd.Parameters.AddWithValue("@nome",           dto.Nome);
     cmd.Parameters.AddWithValue("@data_nasc",      dto.DataNasc);
     cmd.Parameters.AddWithValue("@nacionalidade",  dto.Nacionalidade);
-
-    // campos opcionais: null no C# → NULL no banco (sem bug)
     cmd.Parameters.AddWithValue("@descendencia",    (object?)dto.Descendencia   ?? DBNull.Value);
     cmd.Parameters.AddWithValue("@ano_morte",       (object?)dto.AnoMorte       ?? DBNull.Value);
     cmd.Parameters.AddWithValue("@informacoes_add", (object?)dto.InformacoesAdd ?? DBNull.Value);
@@ -126,8 +220,70 @@ app.MapPost("/api/cadastro", async (CadastroDto dto, HttpContext ctx) =>
 
 app.Run();
 
+// ── Helpers: senha e token ────────────────────────────────
+string HashPassword(string password)
+{
+    var salt = RandomNumberGenerator.GetBytes(16);
+    using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256);
+    var hash = pbkdf2.GetBytes(32);
+    return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+}
+
+bool VerifyPassword(string password, string stored)
+{
+    var parts = stored.Split(':');
+    if (parts.Length != 2) return false;
+    var salt = Convert.FromBase64String(parts[0]);
+    var expected = Convert.FromBase64String(parts[1]);
+    using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256);
+    var hash = pbkdf2.GetBytes(32);
+    return CryptographicOperations.FixedTimeEquals(expected, hash);
+}
+
+string IssueToken(int userId)
+{
+    var exp = DateTimeOffset.UtcNow.AddHours(12).ToUnixTimeSeconds();
+    var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(userId + "." + exp));
+    return payload + "." + Sign(payload);
+}
+
+bool TryValidateToken(string token, out int userId)
+{
+    userId = 0;
+    var parts = token.Split('.');
+    if (parts.Length != 2) return false;
+    var expected = Sign(parts[0]);
+    if (!CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expected),
+                                                 Encoding.UTF8.GetBytes(parts[1])))
+        return false;
+    try
+    {
+        var raw = Encoding.UTF8.GetString(Convert.FromBase64String(parts[0]));
+        var segs = raw.Split('.');
+        if (segs.Length != 2) return false;
+        if (!int.TryParse(segs[0], out var uid)) return false;
+        if (!long.TryParse(segs[1], out var exp)) return false;
+        if (exp < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return false;
+        userId = uid;
+        return true;
+    }
+    catch { return false; }
+}
+
+string Sign(string data)
+{
+    using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(TokenSecret));
+    return Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(data)));
+}
+
 // ── DTOs ─────────────────────────────────────────────────
 record LoginDto(string Email, string Password);
+
+record RegistroDto(
+    string  Email,
+    string  Senha,
+    string? Nome
+);
 
 record CadastroDto(
     string  Nome,
