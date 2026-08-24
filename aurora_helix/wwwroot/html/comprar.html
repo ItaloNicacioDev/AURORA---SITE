@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Adquirir Licença</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<!-- Fallback de céu (apenas quando WebGL indisponível) -->
+<div class="sky">
+    <div class="stars"></div>
+    <div class="ribbon ribbon-1"></div>
+    <div class="ribbon ribbon-2"></div>
+</div>
+
+<div class="page">
+
+    <!-- NAV -->
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="comprar.html" class="active">Comprar</a></li>
+        </ul>
+    </nav>
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <p class="page-eyebrow">Licença Perpétua</p>
+        <h1 class="page-title">Adquira o <em>Aurora</em></h1>
+        <p class="page-subtitle">Pagamento único · Atualizações vitalícias · Suporte incluído</p>
+    </div>
+
+    <!-- GRID -->
+    <div class="checkout-grid">
+
+        <!-- PRODUCT -->
+        <div class="product-card">
+            <span class="product-badge">Disponível</span>
+            <h2 class="product-name">Aurora</h2>
+            <p class="product-version">Versão 4.0 — Licença Individual</p>
+
+            <ul class="product-features">
+                <li><span class="feature-dot"></span>Árvore genealógica ilimitada</li>
+                <li><span class="feature-dot"></span>Armazenamento local + nuvem</li>
+                <li><span class="feature-dot"></span>Importação de arquivos GEDCOM</li>
+                <li><span class="feature-dot"></span>Modo Animus — linha do tempo visual</li>
+                <li><span class="feature-dot"></span>Relatórios em PDF exportáveis</li>
+                <li><span class="feature-dot"></span>Acesso web + desktop (MAUI)</li>
+                <li><span class="feature-dot"></span>Atualizações da v4.x incluídas</li>
+            </ul>
+
+            <div class="price-block">
+                <p class="price-label">Valor único</p>
+                <div class="price-value"><sup>R$</sup> 97<sup style="font-size:1rem;color:var(--text-muted)">,00</sup></div>
+                <p class="price-note">ou 3× de R$ 34,90 no cartão</p>
+            </div>
+        </div>
+
+        <!-- PAYMENT -->
+        <div class="payment-card">
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab tab-paypal active" onclick="switchTab('paypal')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 11.5C7 11.5 6.5 15 9 16C11.5 17 15 15.5 15.5 12.5C16 9.5 13.5 8 11 8H7.5L7 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M9.5 8L9 12C9 12 8.5 15 11 16C13.5 17 17 15.5 17.5 12.5C18 9.5 15.5 8 13 8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    PayPal
+                </button>
+                <button class="tab tab-pix" onclick="switchTab('pix')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L15.5 6.5L12 10L8.5 6.5L12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M12 14L15.5 17.5L12 21L8.5 17.5L12 14Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M3 12L6.5 8.5L10 12L6.5 15.5L3 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M14 12L17.5 8.5L21 12L17.5 15.5L14 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    Pix
+                </button>
+                <button class="tab tab-card" onclick="switchTab('card')">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M6 15H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </rect>
+                </svg>
+                    Cartão
+                </button>
+            </div>
+
+            <!-- PANELS -->
+            <div class="panels">
+
+                <!-- PAYPAL -->
+                <div class="panel panel-paypal active" id="panel-paypal">
+                    <div class="paypal-hero">
+                        <div class="paypal-logo">
+                            <span class="pp-icon pp-p1">P</span>
+                            <span class="pp-icon pp-p2">P</span>
+                            <span class="pp-al">aypal</span>
+                        </div>
+                        <p class="paypal-desc">
+                            Pague de forma rápida e segura com sua conta PayPal.<br>
+                            Você será redirecionado para concluir o pagamento.
+                        </p>
+                        <button class="btn-paypal" onclick="handlePaypal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Pagar com PayPal · R$ 97,00
+                        </button>
+                        <p class="paypal-secure">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Transação protegida e criptografada
+                        </p>
+                    </div>
+
+                    <div class="trust-row">
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            SSL 256-bit
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                            Compra garantida
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                            Entrega imediata
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIX -->
+                <div class="panel panel-pix" id="panel-pix">
+                    <div class="pix-layout">
+                        <div class="pix-qr-wrapper">
+                            <div class="pix-glow"></div>
+                            <div class="pix-qr-bg">
+                                <svg width="152" height="152" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="8" y="8" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="12" y="12" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="18" y="18" width="22" height="22" rx="2" fill="#111"/>
+                                    <rect x="102" y="8" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="106" y="12" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="112" y="18" width="22" height="22" rx="2" fill="#111"/>
+                                    <rect x="8" y="102" width="42" height="42" rx="4" fill="#111"/>
+                                    <rect x="12" y="106" width="34" height="34" rx="2" fill="white"/>
+                                    <rect x="18" y="112" width="22" height="22" rx="2" fill="#111"/>
+                                    <rect x="60" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="8" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="18" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="26" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="18" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="34" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="34" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="42" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="42" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="42" width="8" height="8" fill="#111"/>
+                                    <rect x="8" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="18" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="34" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="42" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="8"  y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="26" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="8"  y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="18" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="34" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="42" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="60" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="68" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="76" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="84" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="76" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="100" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="100" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="110" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="68" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="110" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="126" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="134" y="118" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="84" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="92" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="118" y="134" width="8" height="8" fill="#111"/>
+                                    <rect x="60" y="60" width="32" height="32" rx="4" fill="white"/>
+                                    <path d="M76 68 L80 72 L76 76 L72 72 Z" fill="#32bcad"/>
+                                    <path d="M76 76 L80 80 L76 84 L72 80 Z" fill="#32bcad"/>
+                                    <path d="M68 76 L72 72 L76 76 L72 80 Z" fill="#32bcad"/>
+                                    <path d="M80 76 L84 72 L88 76 L84 80 Z" fill="#32bcad"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="pix-key-block">
+                            <p class="pix-key-label">Chave Pix (e-mail)</p>
+                            <p class="pix-key-value">aurora@exemplo.com.br</p>
+                            <button class="btn-copy" id="btnCopy" onclick="copyPix()">Copiar chave</button>
+                        </div>
+
+                        <p class="pix-notice">
+                            Escaneie o QR Code ou copie a chave Pix.<br>
+                            Após o pagamento, envie o comprovante para<br>
+                            <strong style="color:var(--aurora-teal)">suporte@aurora.app</strong> para ativar sua licença.
+                        </p>
+
+                        <div class="trust-row" style="width:100%">
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                                Instantâneo
+                            </div>
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                                Sem taxas
+                            </div>
+                            <div class="trust-item">
+                                <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Banco Central
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD -->
+                <div class="panel panel-card" id="panel-card">
+                    <div class="card-preview">
+                        <div class="card-chip"></div>
+                        <div class="card-number-preview" id="cardPreview">•••• •••• •••• ••••</div>
+                        <div class="card-brands">
+                            <div class="brand-icon brand-visa">VISA</div>
+                            <div class="brand-icon brand-mc">
+                                <div class="mc-left"></div>
+                                <div class="mc-right"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nome no cartão</label>
+                        <input class="form-input" type="text" placeholder="NOME COMPLETO" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Número do cartão</label>
+                        <input class="form-input" type="text" id="cardNumber"
+                               placeholder="0000 0000 0000 0000" maxlength="19"
+                               oninput="formatCard(this)" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Validade</label>
+                            <input class="form-input" type="text" placeholder="MM/AA" maxlength="5"
+                                   oninput="formatExpiry(this)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input class="form-input" type="text" placeholder="•••" maxlength="3" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Parcelamento</label>
+                        <select class="form-input" style="cursor:pointer">
+                            <option value="1">1× de R$ 97,00 (sem juros)</option>
+                            <option value="3">3× de R$ 34,90 (sem juros)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-pay" onclick="handleCard()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Finalizar compra · R$ 97,00
+                    </button>
+
+                    <div class="trust-row">
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Criptografado
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20,6 9,17 4,12"/></svg>
+                            PCI Compliant
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            3D Secure
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <span>Pagamentos seguros · SSL 256-bit</span>
+    </footer>
+
+</div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/comprar.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<div class="page">
+
+    <!-- NAV -->
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html"      class="active">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html"      class="active">Início</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="registros.html">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <p class="hero-eyebrow">Sistema de Genealogia — v4.0</p>
+        <h1 class="hero-title">
+            <span class="line-1">Bem-vindo à</span><br>
+            <span class="line-2">Aurora</span>
+        </h1>
+        <p class="hero-sub">
+            Explore conexões, preserve memórias e redescubra<br>a história que te define.
+        </p>
+        <div class="hero-actions">
+            <a href="comprar.html" class="btn btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Comprar
+            </a>
+            <a href="explorar.html" class="btn btn-ghost">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Explorar Registros
+            </a>
+        </div>
+        <div class="scroll-hint">
+            <span>Rolar</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- DIVIDER -->
+    <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-icon"></div>
+        <div class="divider-line"></div>
+    </div>
+
+    <!-- FEATURES + NAV TILES -->
+    <section class="section">
+        <p class="section-label">O que você pode fazer</p>
+
+        <!-- Feature cards -->
+        <div class="cards">
+            <a href="cadastro.html" class="card card-1" data-auth="required">
+                <div class="card-number">01</div>
+                <h3 class="card-title">Árvore Genealógica</h3>
+                <p class="card-text">Cadastre novos membros e construa sua árvore familiar conectando gerações através do tempo.</p>
+            </a>
+            <a href="registros.html" class="card card-2">
+                <div class="card-number">02</div>
+                <h3 class="card-title">Registros Históricos</h3>
+                <p class="card-text">Acesse documentos, fotos e memórias preservadas. A história da sua família em um só lugar.</p>
+            </a>
+            <a href="explorar.html" class="card card-3">
+                <div class="card-number">03</div>
+                <h3 class="card-title">Conexões & Memórias</h3>
+                <p class="card-text">Descubra padrões e conexões escondidas entre membros da família através de análise visual.</p>
+            </a>
+        </div>
+
+        <!-- Quick access tiles -->
+        <p class="section-label" style="margin-bottom:24px">Acesso rápido</p>
+        <div class="nav-grid">
+
+            <a href="cadastro.html" class="nav-tile tile-cadastro" data-auth="required">
+                <div class="tile-left">
+                    <div class="tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+                        </svg>
+                    </div>
+                    <div class="tile-info">
+                        <span class="tile-name">Cadastro</span>
+                        <span class="tile-desc">Registrar nova pessoa</span>
+                    </div>
+                </div>
+                <span class="tile-arrow">→</span>
+            </a>
+
+            <a href="explorar.html" class="nav-tile tile-explorar">
+                <div class="tile-left">
+                    <div class="tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </div>
+                    <div class="tile-info">
+                        <span class="tile-name">Explorar</span>
+                        <span class="tile-desc">Buscar na árvore</span>
+                    </div>
+                </div>
+                <span class="tile-arrow">→</span>
+            </a>
+
+            <a href="registros.html" class="nav-tile tile-registros">
+                <div class="tile-left">
+                    <div class="tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                    </div>
+                    <div class="tile-info">
+                        <span class="tile-name">Registros</span>
+                        <span class="tile-desc">Ver todos os registros</span>
+                    </div>
+                </div>
+                <span class="tile-arrow">→</span>
+            </a>
+
+            <a href="comprar.html" class="nav-tile tile-comprar">
+                <div class="tile-left">
+                    <div class="tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <path d="M16 10a4 4 0 01-8 0"/>
+                        </svg>
+                    </div>
+                    <div class="tile-info">
+                        <span class="tile-name">Comprar</span>
+                        <span class="tile-desc">Adquirir licença</span>
+                    </div>
+                </div>
+                <span class="tile-arrow">→</span>
+            </a>
+
+            <a href="sobre.html" class="nav-tile tile-sobre">
+                <div class="tile-left">
+                    <div class="tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="tile-info">
+                        <span class="tile-name">Sobre</span>
+                        <span class="tile-desc">Sobre o Aurora</span>
+                    </div>
+                </div>
+                <span class="tile-arrow">→</span>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+
+</div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

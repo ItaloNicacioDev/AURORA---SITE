@@ -21,10 +21,27 @@ app.MapGet("/", async (HttpContext ctx) =>
     await ctx.Response.SendFileAsync(file);
 });
 
-// ── POST /api/cadastro ───────────────────────────────────
-app.MapPost("/api/cadastro", async (CadastroDto dto) =>
+// ── POST /api/auth/login ─────────────────────────────────
+// DEMO: substituir por identidade real (ASP.NET Identity / JWT).
+// Retorna um token simples se as credenciais baterem.
+app.MapPost("/api/auth/login", (LoginDto dto) =>
 {
-    // String de conexão — ajuste conforme seu container aesyr
+    const string demoEmail = "admin@aurora.app";
+    const string demoPass  = "aurora123";
+    if (dto.Email == demoEmail && dto.Password == demoPass)
+        return Results.Ok(new { token = "aurora-" + Guid.NewGuid() });
+    return Results.Unauthorized();
+});
+
+// ── POST /api/cadastro (exige sessão) ───────────────────
+app.MapPost("/api/cadastro", async (CadastroDto dto, HttpContext ctx) =>
+{
+    // proteção mínima: exige um token de sessão válido
+    var auth = ctx.Request.Headers["Authorization"].ToString();
+    if (string.IsNullOrWhiteSpace(auth) || !auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        return Results.Unauthorized();
+
+    // String de conexão — ajuste conforme seu container
     const string connStr =
         "Host=localhost;Port=5432;Database=aurora;Username=postgres;Password=SUA_SENHA";
 
@@ -59,7 +76,9 @@ app.MapPost("/api/cadastro", async (CadastroDto dto) =>
 
 app.Run();
 
-// ── DTO ──────────────────────────────────────────────────
+// ── DTOs ─────────────────────────────────────────────────
+record LoginDto(string Email, string Password);
+
 record CadastroDto(
     string  Nome,
     string  DataNasc,

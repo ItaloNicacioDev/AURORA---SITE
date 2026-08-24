@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Explorar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<div class="page">
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html" class="active">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html" class="active">Explorar</a>
+        <a href="registros.html">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
+
+    <div class="content">
+        <div class="page-header">
+            <p class="page-eyebrow">Busca Genealógica</p>
+            <h1 class="page-title"><em>Explorar</em> a Árvore</h1>
+            <p class="page-subtitle">Busque por nome, nacionalidade ou período histórico.</p>
+        </div>
+
+        <div class="search-wrap">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input class="search-input" id="searchInput" type="text" placeholder="Buscar por nome, nacionalidade…" oninput="handleSearch()" />
+                <button class="search-btn" onclick="handleSearch()">Buscar</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <span class="filter-chip active" onclick="setFilter(this,'todos')">Todos</span>
+            <span class="filter-chip" onclick="setFilter(this,'vivos')">Vivos</span>
+            <span class="filter-chip" onclick="setFilter(this,'falecidos')">Falecidos</span>
+        </div>
+
+        <div class="results-header">
+            <span class="results-label">Resultados</span>
+            <span class="results-count" id="resultsCount">Carregando…</span>
+        </div>
+
+        <div id="resultsGrid" class="results-grid"></div>
+        <div id="emptyState" class="empty-state" style="display:none">
+            <div class="empty-icon">◌</div>
+            <p class="empty-text">Nenhuma pessoa encontrada.<br>Tente outro termo ou <a href="cadastro.html" style="color:var(--aurora-green)">cadastre a primeira</a>.</p>
+        </div>
+    </div>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+</div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/explorar.js"></script>
+</body>
+</html>

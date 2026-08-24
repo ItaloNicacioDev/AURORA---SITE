@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Cadastro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<div class="page cadastro-page">
+
+    <!-- NAV -->
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="registros.html">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <p class="page-eyebrow">Novo Registro</p>
+        <h1 class="page-title">Cadastrar <em>Pessoa</em></h1>
+        <p class="page-subtitle">Preencha os dados para registrar um novo membro na árvore genealógica.</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+        <!-- alive toggle -->
+        <div class="alive-bar">
+            <span class="alive-label">Status da pessoa</span>
+            <div class="toggle-group">
+                <button class="toggle-btn active-vivo" id="btnVivo" onclick="setStatus('vivo')">● Viva</button>
+                <button class="toggle-btn" id="btnFalecido" onclick="setStatus('falecido')">◌ Falecida</button>
+            </div>
+        </div>
+
+        <div class="form-body">
+
+            <!-- Identificação -->
+            <p class="form-section-label">Identificação</p>
+            <div class="form-grid col-1" style="grid-template-columns:1fr">
+                <div class="form-group">
+                    <label class="form-label">
+                        Nome completo <span class="label-required">*</span>
+                    </label>
+                    <input class="form-input" id="nome" type="text" placeholder="Ex: João Batista da Silva" maxlength="50" />
+                    <span class="field-error" id="err-nome">Por favor, informe o nome.</span>
+                </div>
+            </div>
+
+            <!-- Datas -->
+            <p class="form-section-label">Datas</p>
+            <div class="form-grid col-2">
+                <div class="form-group">
+                    <label class="form-label">
+                        Data de nascimento <span class="label-required">*</span>
+                    </label>
+                    <input class="form-input" id="data_nasc" type="text"
+                           placeholder="DDMMAAAA" maxlength="8"
+                           oninput="this.value=this.value.replace(/\D/g,'')" />
+                    <span class="field-error" id="err-nasc">Informe no formato DDMMAAAA.</span>
+                </div>
+                <div class="form-group morte-field" id="morteField">
+                    <label class="form-label">
+                        Ano da morte <span class="label-optional">opcional</span>
+                    </label>
+                    <input class="form-input" id="ano_morte" type="text"
+                           placeholder="AAAA" maxlength="8"
+                           oninput="this.value=this.value.replace(/\D/g,'')" />
+                </div>
+            </div>
+
+            <!-- Origem -->
+            <p class="form-section-label">Origem</p>
+            <div class="form-grid col-2">
+                <div class="form-group">
+                    <label class="form-label">
+                        Nacionalidade <span class="label-required">*</span>
+                    </label>
+                    <select class="form-select" id="nacionalidade">
+                        <option value="">Selecionar…</option>
+                        <option>Brasileira</option>
+                        <option>Portuguesa</option>
+                        <option>Italiana</option>
+                        <option>Espanhola</option>
+                        <option>Alemã</option>
+                        <option>Francesa</option>
+                        <option>Japonesa</option>
+                        <option>Africana</option>
+                        <option>Indígena</option>
+                        <option>Outra</option>
+                    </select>
+                    <span class="field-error" id="err-nac">Selecione a nacionalidade.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Descendência <span class="label-optional">opcional</span>
+                    </label>
+                    <input class="form-input" id="descendencia" type="text"
+                           placeholder="Ex: Italiana, Africana…" maxlength="50" />
+                </div>
+            </div>
+
+            <!-- Extras -->
+            <p class="form-section-label">Informações adicionais</p>
+            <div class="form-grid" style="grid-template-columns:1fr">
+                <div class="form-group">
+                    <label class="form-label">
+                        Observações <span class="label-optional">opcional</span>
+                    </label>
+                    <textarea class="form-textarea" id="informacoes_add"
+                              placeholder="Histórico, profissão, localidade, curiosidades…"
+                              maxlength="1000"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Sequência de DNA <span class="label-optional">opcional</span>
+                    </label>
+                    <input class="form-input" id="sequencia_dna" type="text"
+                           placeholder="Ex: rs1234567:AA, rs7654321:GG…" maxlength="255" />
+                    <p class="dna-hint">Código de marcadores genéticos ou ID de teste (23andMe, AncestryDNA…)</p>
+                </div>
+            </div>
+
+        </div><!-- /form-body -->
+
+        <!-- FOOTER -->
+        <div class="form-footer">
+      <span class="form-footer-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--aurora-green)">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Dados armazenados localmente com segurança
+      </span>
+            <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+                <div class="spinner"></div>
+                <span class="btn-text" style="display:flex;align-items:center;gap:10px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          Registrar pessoa
+        </span>
+            </button>
+        </div>
+
+    </div><!-- /form-card -->
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cadastro.js"></script>
+</body>
+</html>

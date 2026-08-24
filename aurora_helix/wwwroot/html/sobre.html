@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Sobre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<div class="page">
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html">Registros</a></li>
+            <li><a href="sobre.html" class="active">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="registros.html">Registros</a>
+        <a href="sobre.html" class="active">Sobre</a>
+    </div>
+
+    <div class="content">
+
+        <div class="about-hero">
+            <p class="page-eyebrow page-eyebrow--pink">Projeto Aurora</p>
+            <h1 class="page-title">Sobre o <em class="grad-pink">Aurora</em></h1>
+            <p class="about-lead">Um sistema de genealogia pessoal construído para preservar memórias, conectar gerações e revelar a história que nos define.</p>
+        </div>
+
+        <div class="divider divider--pink"><div class="divider-line"></div><div class="divider-icon"></div><div class="divider-line"></div></div>
+
+        <div class="about-section">
+            <p class="section-tag">O projeto</p>
+            <h2 class="section-title">O que é o Aurora?</h2>
+            <p class="section-text">
+                O Aurora é um sistema de genealogia inspirado no conceito de <strong>Animus</strong> — a ideia de que cada pessoa carrega em si a memória de todos que vieram antes. O sistema permite cadastrar, organizar e explorar uma árvore genealógica completa, com informações históricas, registros de DNA e conexões entre membros da família.<br><br>
+                É um projeto <strong>pessoal e de longa data</strong>, atualmente em sua quarta iteração, com backend em .NET e banco de dados PostgreSQL.
+            </p>
+        </div>
+
+        <div class="about-section">
+            <p class="section-tag">Histórico</p>
+            <h2 class="section-title">A linha do tempo</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot v-hx">Hx</div>
+                    <div class="timeline-body">
+                        <p class="timeline-year">2013</p>
+                        <p class="timeline-name">Hx — Primeira versão</p>
+                        <p class="timeline-desc">A semente original do projeto. Conceito inicial de registro genealógico.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot v-nomade">Nm</div>
+                    <div class="timeline-body">
+                        <p class="timeline-year">2015</p>
+                        <p class="timeline-name">Nômade — Terminal Python</p>
+                        <p class="timeline-desc">Versão em Python com interface de terminal. Programação raiz no melhor estilo.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot v-helix">Hx</div>
+                    <div class="timeline-body">
+                        <p class="timeline-year">2022</p>
+                        <p class="timeline-name">Helix — Aplicação Windows</p>
+                        <p class="timeline-desc">Primeira versão com interface gráfica desktop e banco PostgreSQL.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot v-aurora">✦</div>
+                    <div class="timeline-body">
+                        <p class="timeline-year">2024 — atual</p>
+                        <p class="timeline-name">Aurora v4.0 — .NET MAUI + Web API</p>
+                        <p class="timeline-desc">A versão atual. Arquitetura moderna com MAUI, ASP.NET Core Web API, PostgreSQL via Docker e interface web responsiva.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <p class="section-tag">Stack técnica</p>
+            <h2 class="section-title">Tecnologias utilizadas</h2>
+            <div class="tech-grid">
+                <div class="tech-chip chip-violet"><div class="tech-dot"></div><span class="tech-name">.NET MAUI</span></div>
+                <div class="tech-chip chip-teal"><div class="tech-dot"></div><span class="tech-name">ASP.NET Core</span></div>
+                <div class="tech-chip chip-green"><div class="tech-dot"></div><span class="tech-name">PostgreSQL</span></div>
+                <div class="tech-chip chip-teal"><div class="tech-dot"></div><span class="tech-name">Docker</span></div>
+                <div class="tech-chip chip-violet"><div class="tech-dot"></div><span class="tech-name">Entity Framework</span></div>
+                <div class="tech-chip chip-pink"><div class="tech-dot"></div><span class="tech-name">HTML / CSS / JS</span></div>
+                <div class="tech-chip chip-green"><div class="tech-dot"></div><span class="tech-name">Npgsql</span></div>
+                <div class="tech-chip chip-teal"><div class="tech-dot"></div><span class="tech-name">C# (.NET 8+)</span></div>
+                <div class="tech-chip chip-pink"><div class="tech-dot"></div><span class="tech-name">JetBrains Rider</span></div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <div class="cta-block">
+                <h2 class="cta-title">Pronto para explorar?</h2>
+                <p class="cta-sub">Cadastre as pessoas da sua família e comece a construir<br>a árvore genealógica da sua história.</p>
+                <div class="cta-btns">
+                    <a href="cadastro.html" class="btn btn-primary">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo cadastro
+                    </a>
+                    <a href="explorar.html" class="btn btn-ghost">Explorar registros</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+</div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

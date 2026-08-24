@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora — Registros</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/aurora.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- PRÉ-LOADER 3D -->
+<div id="preloader">
+    <canvas id="preloaderCanvas"></canvas>
+    <div class="preloader-ui">
+        <div class="preloader-word">Aurora</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-pct" id="preloaderPct">0%</div>
+    </div>
+</div>
+
+<canvas id="auroraCanvas"></canvas>
+<div class="grain"></div>
+
+<div class="page">
+    <nav>
+        <a href="home.html" class="nav-logo">A<span>urora</span></a>
+        <ul class="nav-links">
+            <li><a href="home.html">Início</a></li>
+            <li><a href="explorar.html">Explorar</a></li>
+            <li><a href="registros.html" class="active">Registros</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+        </ul>
+        <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-drawer" id="drawer">
+        <a href="home.html">Início</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="registros.html" class="active">Registros</a>
+        <a href="sobre.html">Sobre</a>
+    </div>
+
+    <div class="content">
+        <div class="page-header">
+            <div class="header-left">
+                <p class="page-eyebrow">Banco de dados</p>
+                <h1 class="page-title">Todos os <em>Registros</em></h1>
+            </div>
+            <a href="cadastro.html" class="btn-new" data-auth="required">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Novo cadastro
+            </a>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card stat-1"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total de pessoas</div></div>
+            <div class="stat-card stat-2"><div class="stat-value" id="statVivos">—</div><div class="stat-label">Vivos</div></div>
+            <div class="stat-card stat-3"><div class="stat-value" id="statFalecidos">—</div><div class="stat-label">Falecidos</div></div>
+            <div class="stat-card stat-4"><div class="stat-value" id="statNac">—</div><div class="stat-label">Nacionalidades</div></div>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-toolbar">
+                <span class="toolbar-label" id="tableLabel">Carregando…</span>
+                <div class="toolbar-search">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(232,244,248,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="tableSearch" placeholder="Filtrar…" oninput="filterTable()" />
+                </div>
+            </div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Nascimento</th>
+                        <th>Nacionalidade</th>
+                        <th>Descendência</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Aurora — Sistema de Genealogia</span>
+        <div class="dot"></div>
+        <span>v4.0 &nbsp;·&nbsp; .NET MAUI + Web API</span>
+    </footer>
+</div>
+
+<script src="js/aurora3d.js"></script>
+<script src="js/preloader.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/registros.js"></script>
+</body>
+</html>
