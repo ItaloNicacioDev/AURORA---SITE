@@ -17,7 +17,7 @@ app.UseStaticFiles();
 // ── Configurações ─────────────────────────────────────────
 // String de conexão — ajuste a senha (SUA_SENHA) conforme seu container
 const string connStr =
-    "Host=localhost;Port=5432;Database=aurora;Username=postgres;Password=SUA_SENHA";
+    "Host=localhost;Port=5432;Database=aurora;Username=postgres;Password=1205";
 
 // Segredo usado para assinar os tokens de sessão (altere em produção)
 const string TokenSecret = "aurora-helix-chave-super-secreta-altere-me";
