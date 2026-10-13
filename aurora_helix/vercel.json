@@ -2,10 +2,35 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": "wwwroot",
+  "cleanUrls": false,
   "rewrites": [
     {
       "source": "/",
       "destination": "/html/home.html"
+    },
+    {
+      "source": "/home.html",
+      "destination": "/html/home.html"
+    },
+    {
+      "source": "/explorar.html",
+      "destination": "/html/explorar.html"
+    },
+    {
+      "source": "/registros.html",
+      "destination": "/html/registros.html"
+    },
+    {
+      "source": "/sobre.html",
+      "destination": "/html/sobre.html"
+    },
+    {
+      "source": "/cadastro.html",
+      "destination": "/html/cadastro.html"
+    },
+    {
+      "source": "/comprar.html",
+      "destination": "/html/comprar.html"
     }
   ]
 }
