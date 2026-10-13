@@ -55,6 +55,12 @@ body {
 
 a { color: inherit; }
 
+img, svg { max-width: 100%; }
+input, select, textarea { font-size: 16px; } /* evita zoom automático no iOS */
+@media (min-width: 641px) {
+    input, select, textarea { font-size: inherit; }
+}
+
 /* Fallback caso o WebGL não esteja disponível */
 body.no-webgl #auroraCanvas { display: none; }
 body.no-webgl {
@@ -70,6 +76,7 @@ body.no-webgl {
     width: 100%; height: 100%;
     z-index: 0; pointer-events: none;
     display: block;
+    contain: strict;               /* isola layout/paint do fundo */
 }
 
 /* leve grão para dar textura ao fundo */
@@ -84,10 +91,17 @@ nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     height: var(--nav-h);
     display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
     padding: 0 48px;
     background: rgba(2,8,16,0.55);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid transparent;
+    transition: background 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+/* nav mais sólida ao rolar (melhora leitura sobre o fundo 3D) */
+nav.scrolled {
+    background: rgba(2,8,16,0.82);
+    border-bottom-color: var(--glass-border);
 }
 .nav-logo {
     font-family: 'Cormorant Garamond', serif;
@@ -101,6 +115,7 @@ nav {
     color: var(--text-muted); text-decoration: none;
     font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase;
     transition: color 0.3s var(--ease); position: relative;
+    white-space: nowrap;
 }
 .nav-links a::after {
     content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
@@ -115,6 +130,7 @@ nav {
 .nav-burger {
     display: none; flex-direction: column; gap: 5px;
     cursor: pointer; padding: 4px; background: none; border: none;
+    flex-shrink: 0;
 }
 .nav-burger span {
     display: block; width: 24px; height: 1.5px;
@@ -129,7 +145,7 @@ nav {
     top: var(--nav-h); left: 0; right: 0;
     background: rgba(2,8,16,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
-    z-index: 99; padding: 24px 28px;
+    z-index: 99; padding: 12px 28px 24px;
     flex-direction: column; animation: drawerDown 0.25s ease;
 }
 .nav-drawer.open { display: flex; }
@@ -172,8 +188,10 @@ nav {
 /* ── RODAPÉ ── */
 footer {
     padding: 28px 48px; border-top: 1px solid var(--glass-border);
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    flex-wrap: wrap;
     font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-muted);
+    text-align: center;
 }
 footer .dot {
     width: 5px; height: 5px; border-radius: 50%;
@@ -188,21 +206,24 @@ footer .dot {
     text-transform: uppercase; color: var(--text-muted);
     background: transparent; border: 1px solid var(--glass-border); border-radius: 3px;
     padding: 8px 14px; cursor: pointer; transition: all 0.25s var(--ease);
+    white-space: nowrap;
 }
 .nav-account-btn:hover { color: var(--aurora-green); border-color: rgba(0,255,179,0.4); }
-.nav-account-user { color: var(--aurora-teal); border-color: rgba(0,212,255,0.3); }
+.nav-account-user { color: var(--aurora-teal); border-color: rgba(0,212,255,0.3); max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 
 .auth-modal-backdrop {
     position: fixed; inset: 0; z-index: 5000;
     display: flex; align-items: center; justify-content: center;
     background: rgba(2,8,16,0.7); backdrop-filter: blur(8px);
     opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease);
+    padding: 20px;                                  /* folga em telas pequenas */
 }
 .auth-modal-backdrop.open { opacity: 1; pointer-events: auto; }
 .auth-modal {
-    width: min(360px, 90vw); background: var(--mid-space);
+    width: min(360px, 100%); background: var(--mid-space);
     border: 1px solid var(--glass-border); border-radius: 10px; padding: 32px;
     position: relative; box-shadow: var(--shadow-soft);
+    max-height: calc(100vh - 40px); overflow-y: auto;  /* scroll se a tela for baixa */
 }
 .auth-modal h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.6rem; margin-bottom: 6px; }
 .auth-modal p.sub { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 22px; letter-spacing: 0.04em; }
@@ -211,7 +232,7 @@ footer .dot {
 .auth-field input {
     width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04);
     border: 1px solid var(--glass-border); border-radius: 4px; color: var(--text-primary);
-    font-family: 'Rajdhani', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.25s;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.25s;
 }
 .auth-field input:focus { border-color: rgba(0,255,179,0.4); }
 .auth-error { color: var(--error); font-size: 0.7rem; min-height: 1em; margin-bottom: 10px; letter-spacing: 0.06em; }
@@ -254,6 +275,7 @@ footer .dot {
 .preloader-ui {
     position: relative; z-index: 2; text-align: center;
     display: flex; flex-direction: column; align-items: center; gap: 22px;
+    padding: 0 24px;
 }
 .preloader-word {
     font-family: 'Cormorant Garamond', serif;
@@ -276,6 +298,33 @@ footer .dot {
 }
 .preloader-pct {
     font-size: 0.7rem; letter-spacing: 0.4em; color: var(--text-muted);
+}
+
+/* ============================================================
+   REVEAL ON SCROLL (aplicado via main.js)
+   ============================================================ */
+.will-reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.will-reveal.revealed {
+    opacity: 1;
+    transform: none;
+}
+
+/* ============================================================
+   TILT 3D (cards) — ativado só com pointer fino
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+    .card, .nav-tile {
+        transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+        will-change: transform;
+        transition: transform 0.25s var(--ease), border-color 0.35s, box-shadow 0.35s;
+    }
+    .card:hover, .nav-tile:hover {
+        transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px);
+    }
 }
 
 /* ============================================================
@@ -313,6 +362,19 @@ footer .dot {
 @keyframes skyPulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pixGlow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* ============================================================
+   ACESSIBILIDADE — movimento reduzido
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .will-reveal { opacity: 1; transform: none; }
+}
 
 /* ============================================================
    RESPONSIVO — base (nav)
