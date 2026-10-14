@@ -1,18 +1,17 @@
 /* ============================================================
-   AURORA 3D v2 — Fundo animado em WebGL
-   1) Céu de aurora boreal (shader FBM)      — camada base
+   AURORA 3D v3 — Fundo animado em WebGL (limpo e leve)
+   1) Céu de aurora sutil (shader FBM)        — camada base
    2) Hélice de DNA em partículas 3D         — assinatura Helix
-   3) Poeira de "memórias" com parallax      — profundidade
    · Reage ao mouse e ao scroll (parallax suave)
    · Pausa quando a aba está oculta
-   · Menos partículas/resolução em telas pequenas
    · Respeita prefers-reduced-motion (quadro estático)
+   · Menos partículas, menos brilho, mais elegância
    Exponibiliza: window.Aurora3D.init(canvasId, { mouse })
    ============================================================ */
 (function () {
     'use strict';
 
-    /* ── 1) SHADER DO CÉU (aurora boreal) ─────────────────── */
+    /* ── 1) SHADER DO CÉU (aurora boreal sutil) ────────────── */
     const SKY_VERT = `
         attribute vec2 aPos;
         varying vec2 vUv;
@@ -46,29 +45,29 @@
         }
         float fbm(vec2 p) {
             float v = 0.0, a = 0.5;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 4; i++) {
                 v += a * noise(p);
-                p = p * 2.03 + vec2(1.7, 9.2);
+                p = p * 2.02 + vec2(1.7, 9.2);
                 a *= 0.5;
             }
             return v;
         }
         float auroraLayer(vec2 uv, float t, float layer, float mx) {
-            float speed = 0.18 + layer * 0.12;
+            float speed = 0.12 + layer * 0.08;
             float x = uv.x;
-            float base = 0.32 + layer * 0.13 + 0.07 * sin(x * 1.8 + t * speed * 3.0 + layer * 1.7);
-            float wave = 0.06 * sin(x * 5.0 + t * speed * 5.0 + layer)
-                       + 0.035 * sin(x * 11.0 - t * speed * 4.0 + layer * 2.3);
-            float y = base + wave + mx * 0.12 * sin(x * 2.5 + layer);
+            float base = 0.35 + layer * 0.12 + 0.05 * sin(x * 1.5 + t * speed * 2.0 + layer * 1.7);
+            float wave = 0.04 * sin(x * 4.0 + t * speed * 3.0 + layer)
+                       + 0.02 * sin(x * 9.0 - t * speed * 2.5 + layer * 2.3);
+            float y = base + wave + mx * 0.08 * sin(x * 2.0 + layer);
             float d = uv.y - y;
-            float n = fbm(vec2(x * 4.0 + t * speed, layer * 8.0));
-            float thick = 0.18 + 0.22 * n;
+            float n = fbm(vec2(x * 3.0 + t * speed, layer * 6.0));
+            float thick = 0.22 + 0.18 * n;
             float r = d / thick;
             float band = exp(-r * r);
-            float col = fbm(vec2(x * 32.0 + t * speed * 2.0, uv.y * 9.0 + layer * 3.0));
-            band *= 0.35 + 0.9 * col;
-            band *= smoothstep(1.05, 0.15, uv.y);
-            band *= smoothstep(-0.05, 0.25, uv.y);
+            float col = fbm(vec2(x * 20.0 + t * speed * 1.5, uv.y * 6.0 + layer * 2.0));
+            band *= 0.25 + 0.7 * col;
+            band *= smoothstep(1.1, 0.2, uv.y);
+            band *= smoothstep(-0.1, 0.3, uv.y);
             return max(band, 0.0);
         }
 
@@ -78,66 +77,60 @@
             vec2 p = uv; p.x *= aspect;
             float t = uTime;
             float mx = (uMouse.x - 0.5);
-            vec2 uvA = uv + vec2(0.0, uScroll * 0.15);
+            vec2 uvA = uv + vec2(0.0, uScroll * 0.1);
 
-            /* céu base */
-            vec3 col = mix(vec3(0.012, 0.035, 0.07), vec3(0.004, 0.012, 0.03), uv.y);
+            /* céu base — mais escuro, menos gradiente */
+            vec3 col = mix(vec3(0.008, 0.025, 0.05), vec3(0.003, 0.008, 0.02), uv.y);
 
-            /* estrelas discretas */
-            vec2 sp = p * 130.0;
+            /* estrelas bem discretas */
+            vec2 sp = p * 100.0;
             vec2 cell = floor(sp);
             float h = hash(cell);
-            float star = step(0.972, h);
-            float tw = 0.5 + 0.5 * sin(t * 2.5 + h * 120.0);
+            float star = step(0.985, h);
+            float tw = 0.6 + 0.4 * sin(t * 2.0 + h * 100.0);
             star *= tw;
-            star *= smoothstep(0.2, 0.9, uv.y);
-            col += vec3(0.8, 0.9, 1.0) * star * 0.4;
+            star *= smoothstep(0.3, 0.95, uv.y);
+            col += vec3(0.7, 0.85, 1.0) * star * 0.25;
 
-            /* aurora (3 camadas) — sutil para não competir com o texto */
+            /* aurora (2 camadas apenas) — bem sutil */
             vec3 aur = vec3(0.0);
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 2; i++) {
                 float fi = float(i);
                 float b = auroraLayer(uvA, t, fi, mx);
-                vec3 cL = mix(vec3(0.0, 1.0, 0.6), vec3(0.0, 0.8, 1.0), fi / 2.0);
-                cL = mix(cL, vec3(0.55, 0.25, 1.0), 0.5 + 0.5 * sin(fi * 1.7));
-                cL = mix(cL, vec3(1.0, 0.3, 0.85), smoothstep(0.5, 1.0, uvA.y) * 0.4);
+                vec3 cL = mix(vec3(0.0, 0.85, 0.5), vec3(0.0, 0.7, 1.0), fi);
+                cL = mix(cL, vec3(0.5, 0.2, 1.0), 0.3 + 0.3 * sin(fi * 1.7));
                 aur += cL * b;
             }
-            col += aur * 0.5;
+            col += aur * 0.28;  /* bem mais sutil */
 
-            /* reflexo no "chão" */
-            float g = smoothstep(0.35, 0.0, uv.y);
-            col += vec3(0.0, 0.25, 0.2) * g * 0.05;
-
-            /* vinheta */
-            float vig = smoothstep(1.25, 0.2, length((uv - 0.5) * vec2(aspect, 1.0)));
-            col *= mix(0.7, 1.0, vig);
+            /* vinheta suave */
+            float vig = smoothstep(1.3, 0.25, length((uv - 0.5) * vec2(aspect, 1.0)));
+            col *= mix(0.75, 1.0, vig);
 
             gl_FragColor = vec4(col, 1.0);
         }
     `;
 
-    /* ── 2) SHADER DAS PARTÍCULAS (hélice + poeira) ────────── */
+    /* ── 2) SHADER DAS PARTÍCULAS (apenas hélice de DNA) ────── */
     const PT_VERT = `
         precision highp float;
         attribute float aSeed;
         uniform float uTime;
-        uniform float uMode;     /* 0 = hélice de DNA, 1 = poeira   */
-        uniform vec2  uMouse;    /* centrado: [-0.5..0.5]          */
-        uniform float uScroll;   /* 0..1                            */
+        uniform vec2  uMouse;
+        uniform float uScroll;
         uniform float uAspect;
         uniform float uDpr;
-        uniform float uPx;       /* canvas.height / 1000            */
+        uniform float uPx;
         varying float vFade;
         varying vec3  vColor;
 
         float hash1(float n) { return fract(sin(n * 127.1) * 43758.5453); }
 
-        /* paleta oficial do Aurora: verde -> ciano -> violeta -> rosa */
+        /* paleta Aurora: verde -> ciano -> violeta */
         vec3 palette(float t) {
-            vec3 c = mix(vec3(0.0, 1.0, 0.70),  vec3(0.0, 0.83, 1.0), smoothstep(0.00, 0.35, t));
-            c = mix(c, vec3(0.48, 0.18, 1.0), smoothstep(0.35, 0.70, t));
-            c = mix(c, vec3(1.0,  0.31, 0.85), smoothstep(0.70, 1.00, t));
+            vec3 c = mix(vec3(0.0, 1.0, 0.70),  vec3(0.0, 0.83, 1.0), smoothstep(0.00, 0.45, t));
+            c = mix(c, vec3(0.48, 0.18, 1.0), smoothstep(0.45, 0.85, t));
+            c = mix(c, vec3(1.0,  0.31, 0.85), smoothstep(0.85, 1.00, t));
             return c;
         }
 
@@ -147,71 +140,49 @@
             float fade = 1.0;
             vec3  col  = vec3(1.0);
 
-            if (uMode < 0.5) {
-                /* ── HÉLICE DE DNA: duas fitas + degraus ── */
-                float s  = aSeed * 76.123;
-                float r1 = hash1(s);
-                float r2 = hash1(s + 11.7);
-                float r3 = hash1(s + 23.4);
+            /* ── HÉLICE DE DNA: duas fitas + degraus ── */
+            float s  = aSeed * 76.123;
+            float r1 = hash1(s);
+            float r2 = hash1(s + 11.7);
+            float r3 = hash1(s + 23.4);
 
-                /* progresso ao longo da hélice, derivando lentamente */
-                float prog   = fract(r1 + uTime * (0.010 + 0.010 * r2));
-                float isRung = step(0.70, r3);
-                /* degraus travados em intervalos quantizados */
-                float q = mix(prog, floor(prog * 22.0) / 22.0, isRung);
-                float f = mix(0.0, fract(r1 * 93.7), isRung);
+            float prog   = fract(r1 + uTime * (0.008 + 0.008 * r2));
+            float isRung = step(0.72, r3);
+            float q = mix(prog, floor(prog * 20.0) / 20.0, isRung);
+            float f = mix(0.0, fract(r1 * 93.7), isRung);
 
-                float baseAng = q * 2.6 * 6.28318 + uTime * 0.20; /* rotação Y */
-                float side    = step(0.5, fract(r2 * 7.77));      /* fita A/B */
-                float ang     = baseAng + side * 3.14159;
+            float baseAng = q * 2.4 * 6.28318 + uTime * 0.15;
+            float side    = step(0.5, fract(r2 * 7.77));
+            float ang     = baseAng + side * 3.14159;
 
-                float radius = 0.46;
-                vec3 A = vec3(cos(baseAng) * radius, 0.0, sin(baseAng) * radius);
-                vec3 B = vec3(-A.x, 0.0, -A.z);
+            float radius = 0.42;
+            vec3 A = vec3(cos(baseAng) * radius, 0.0, sin(baseAng) * radius);
+            vec3 B = vec3(-A.x, 0.0, -A.z);
 
-                vec3 onStrand = vec3(cos(ang) * radius, 0.0, sin(ang) * radius);
-                vec3 onRung   = mix(A, B, f);
-                pos = mix(onStrand, onRung, isRung);
-                pos.y = (q - 0.5) * 1.35;
+            vec3 onStrand = vec3(cos(ang) * radius, 0.0, sin(ang) * radius);
+            vec3 onRung   = mix(A, B, f);
+            pos = mix(onStrand, onRung, isRung);
+            pos.y = (q - 0.5) * 1.25;
 
-                /* respiração sutil */
-                pos.xy *= 1.0 + 0.03 * sin(uTime * 0.5 + q * 6.0);
+            /* respiração sutil */
+            pos.xy *= 1.0 + 0.02 * sin(uTime * 0.4 + q * 5.0);
 
-                col  = mix(palette(q), vec3(0.55, 0.85, 1.0), isRung * 0.45);
-                fade = smoothstep(0.0, 0.10, q) * smoothstep(1.0, 0.88, q);
-                fade *= 0.55 + 0.45 * sin(uTime * 0.9 + r1 * 40.0);  /* cintilar */
-                fade *= 0.62;                                        /* sutil */
-                size = mix(2.6, 1.5, isRung);
+            col  = mix(palette(q), vec3(0.5, 0.8, 1.0), isRung * 0.35);
+            fade = smoothstep(0.0, 0.12, q) * smoothstep(1.0, 0.9, q);
+            fade *= 0.5 + 0.35 * sin(uTime * 0.7 + r1 * 40.0);
+            fade *= 0.5;  /* mais sutil */
+            size = mix(2.2, 1.3, isRung);
 
-                /* parallax de mouse por profundidade + drift de scroll */
-                pos.xy += uMouse * vec2(0.10, 0.06) * (0.6 - pos.z);
-                pos.y  += uScroll * 0.55;
-            } else {
-                /* ── POEIRA DE MEMÓRIAS ── */
-                float s  = aSeed * 143.7;
-                float r1 = hash1(s);
-                float r2 = hash1(s + 5.3);
-                float r3 = hash1(s + 9.1);
-                float depth = 0.35 + 0.65 * r3;   /* camadas de profundidade */
+            /* parallax de mouse por profundidade + drift de scroll */
+            pos.xy += uMouse * vec2(0.07, 0.04) * (0.6 - pos.z);
+            pos.y  += uScroll * 0.4;
 
-                pos = vec3(r1 * 2.0 - 1.0, r2 * 2.0 - 1.0, depth);
-                pos.x += 0.05 * sin(uTime * 0.05 + r1 * 6.283);
-                pos.y += 0.06 * sin(uTime * 0.04 + r2 * 6.283) + uScroll * depth * 0.9;
-                pos.xy += uMouse * vec2(0.05, 0.035) * depth;
-
-                col  = palette(fract(r1 * 3.17)) * 0.45 + 0.30;
-                fade = 0.20 + 0.80 * (0.5 + 0.5 * sin(uTime * (0.3 + r2 * 0.7) + r1 * 30.0));
-                fade *= smoothstep(1.05, 0.70, abs(pos.y));
-                fade *= 0.45;
-                size = (0.7 + 1.5 * r2) * depth;
-            }
-
-            /* projeção manual (fundo, sem câmera) */
-            float persp = 1.0 / (1.35 - pos.z * 0.45);
-            float scale = 1.15 * min(uAspect, 1.0);
+            /* projeção manual */
+            float persp = 1.0 / (1.3 - pos.z * 0.4);
+            float scale = 1.1 * min(uAspect, 1.0);
             vec2 xy = vec2(pos.x * persp * scale / uAspect, pos.y * persp * scale);
             gl_Position = vec4(xy, 0.0, 1.0);
-            gl_PointSize = max(1.5, size * uDpr * persp * uPx * 1.6);
+            gl_PointSize = max(1.3, size * uDpr * persp * uPx * 1.3);
 
             vFade  = fade;
             vColor = col;
@@ -225,8 +196,8 @@
         void main() {
             vec2 d = gl_PointCoord - 0.5;
             float r2 = dot(d, d) * 4.0;
-            float a = exp(-r2 * 3.2) * vFade;
-            if (a < 0.004) discard;
+            float a = exp(-r2 * 3.5) * vFade;
+            if (a < 0.005) discard;
             gl_FragColor = vec4(vColor * a, a);
         }
     `;
@@ -276,9 +247,7 @@
         const small   = Math.min(window.screen.width, window.screen.height) < 720
                      || window.innerWidth < 720;
 
-        const N_HELIX = small ? 420 : 950;   /* partículas da hélice   */
-        const N_DUST  = small ? 80  : 150;   /* partículas de poeira   */
-        const DPR_CAP = small ? 1.5 : 2;
+        const N_HELIX = small ? 350 : 650;  /* menos partículas */
 
         /* buffer do quad de tela cheia (céu) */
         const quadBuf = gl.createBuffer();
@@ -288,8 +257,8 @@
             -1,  1,  1, -1,   1, 1
         ]), gl.STATIC_DRAW);
 
-        /* buffer de sementes (uma por partícula) */
-        const seeds = new Float32Array(N_HELIX + N_DUST);
+        /* buffer de sementes */
+        const seeds = new Float32Array(N_HELIX);
         for (let i = 0; i < seeds.length; i++) seeds[i] = Math.random();
         const seedBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, seedBuf);
@@ -307,7 +276,6 @@
         gl.useProgram(pts);
         const ptSeed   = gl.getAttribLocation(pts, 'aSeed');
         const uPtTime  = gl.getUniformLocation(pts, 'uTime');
-        const uPtMode  = gl.getUniformLocation(pts, 'uMode');
         const uPtMouse = gl.getUniformLocation(pts, 'uMouse');
         const uPtScr   = gl.getUniformLocation(pts, 'uScroll');
         const uPtAsp   = gl.getUniformLocation(pts, 'uAspect');
@@ -331,7 +299,7 @@
         }, { passive: true });
 
         function resize() {
-            const dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
+            const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
             const w = Math.max(1, Math.floor(window.innerWidth  * dpr));
             const h = Math.max(1, Math.floor(window.innerHeight * dpr));
             if (canvas.width !== w || canvas.height !== h) {
@@ -345,7 +313,7 @@
         resize();
         window.addEventListener('resize', function () {
             resize();
-            if (reduced) drawFrame(20000);  /* re-renderiza o quadro estático */
+            if (reduced) drawFrame(20000);
         });
 
         const start = performance.now();
@@ -366,7 +334,7 @@
             gl.uniform1f(uSkyScr, scroll);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-            /* 2) partículas — aditivo (brilho) */
+            /* 2) partículas — aditivo (brilho sutil) */
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.ONE, gl.ONE);
             gl.useProgram(pts);
@@ -379,26 +347,21 @@
             gl.uniform1f(uPtAsp, canvas.width / canvas.height);
             gl.uniform1f(uPtDpr, canvas.width / Math.max(1, window.innerWidth));
             gl.uniform1f(uPtPx, canvas.height / 1000);
-
-            gl.uniform1f(uPtMode, 0);                       /* hélice */
             gl.drawArrays(gl.POINTS, 0, N_HELIX);
-            gl.uniform1f(uPtMode, 1);                       /* poeira */
-            gl.drawArrays(gl.POINTS, N_HELIX, N_DUST);
 
-            window.Aurora3D.ok = true;   /* sinal p/ diagnóstico */
+            window.Aurora3D.ok = true;
         }
 
         function loop(now) {
             raf = requestAnimationFrame(loop);
-            if (document.hidden) return;   /* pausa quando aba oculta */
-            cur.x += (tgt.x - cur.x) * 0.05;
-            cur.y += (tgt.y - cur.y) * 0.05;
-            scroll += (scrollT - scroll) * 0.06;
+            if (document.hidden) return;
+            cur.x += (tgt.x - cur.x) * 0.04;
+            cur.y += (tgt.y - cur.y) * 0.04;
+            scroll += (scrollT - scroll) * 0.05;
             drawFrame(now);
         }
 
         if (reduced) {
-            /* movimento reduzido: um único quadro estático */
             drawFrame(20000);
         } else {
             raf = requestAnimationFrame(loop);
